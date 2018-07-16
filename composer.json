@@ -1,0 +1,27 @@
+{
+    "name": "revision-ten/cqrs",
+    "type": "library",
+    "description": "RevisionTen CQRS",
+    "keywords": ["event-sourcing", "cqrs", "symfony-bundle"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Cornelius K",
+            "email": "kim247@hotmail.de"
+        }
+    ],
+    "require": {
+        "php": "^7.1",
+        "symfony/framework-bundle": "^3.0||^4.0",
+        "symfony/yaml": "^3.0||^4.0",
+        "symfony/orm-pack": "^1.0",
+        "ramsey/uuid": "^3.0"
+    },
+    "require-dev": {
+        "symfony/browser-kit": "^4.0",
+        "symfony/phpunit-bridge": "^4.0"
+    },
+    "autoload": {
+        "psr-4": { "RevisionTen\\CQRS\\": "" }
+    }
+}

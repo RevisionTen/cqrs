@@ -1,0 +1,3 @@
+# Default cqrs bundle config.
+cqrs:
+    enabled: true

@@ -1,0 +1,25 @@
+services:
+    messagebus:
+        alias: RevisionTen\CQRS\Services\MessageBus
+        public: true
+    RevisionTen\CQRS\Services\:
+        resource: '../../Services/*'
+        exclude: '../../Services/{MessageBus.php}'
+        public: true
+        autowire: true
+    RevisionTen\CQRS\Services\MessageBus:
+        public: true
+        autowire: true
+        arguments:
+            $env: '%kernel.environment%'
+
+doctrine:
+    orm:
+        mappings:
+            CqrsBundle:
+                mapping: true
+                type: annotation
+                dir: 'Model'
+                alias: CqrsBundle
+                prefix: 'RevisionTen\CQRS\Model'
+                is_bundle: true
