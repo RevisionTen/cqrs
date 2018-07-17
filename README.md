@@ -3,31 +3,31 @@ A basic CQRS Implementation.
 
 ### Recommended class naming convention and requirements
 
-#####Aggregate class:
+##### Aggregate class:
 
 *Aggregate*
 
 `final class XYZ extends Aggregate`
 
-#####Command class:
+##### Command class:
 
 *AggregateAction*Command
 
 `final class XYZ extends Command implements CommandInterface`
 
-#####Command handler class:
+##### Command handler class:
 
 *AggregateAction*Handler
 
 `final class XYZ extends Handler implements HandlerInterface`
 
-#####Event class:
+##### Event class:
 
 *AggregateAction*Event
 
 `final class XYZ extends Event implements EventInterface`
 
-#####Event listener class:
+##### Event listener class:
 
 *AggregateAction*Listener
 
