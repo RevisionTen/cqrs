@@ -1,37 +1,37 @@
-#revision-ten/cqrs
+# revision-ten/cqrs
 A basic CQRS Implementation.
 
-###Class Naming Convention and Requirements
+### Recommended class naming convention and requirements
 
-**Aggregate:**
+#####Aggregate class:
 
 *Aggregate*
 
-`extends Aggregate`
+`final class XYZ extends Aggregate`
 
-**Command:**
+#####Command class:
 
 *AggregateAction*Command
 
-`extends Command implements CommandInterface`
+`final class XYZ extends Command implements CommandInterface`
 
-**Command Handler:**
+#####Command handler class:
 
 *AggregateAction*Handler
 
-`extends Handler implements HandlerInterface`
+`final class XYZ extends Handler implements HandlerInterface`
 
-**Event:**
+#####Event class:
 
 *AggregateAction*Event
 
-`extends Event implements EventInterface`
+`final class XYZ extends Event implements EventInterface`
 
-**Event Listener:**
+#####Event listener class:
 
 *AggregateAction*Listener
 
-`implements ListenerInterface`
+`final class XYZ implements ListenerInterface`
 
 
 Example:
