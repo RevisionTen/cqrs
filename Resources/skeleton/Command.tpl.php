@@ -1,0 +1,29 @@
+<?= "<?php\n"; ?>
+
+declare(strict_types=1);
+
+namespace <?= $namespace; ?>\Command;
+
+use <?= $namespace; ?>\Handler\<?= $commandName; ?>Handler;
+use <?= $aggregateNamespace; ?>\<?= $aggregateClass; ?>;
+use RevisionTen\CQRS\Command\Command;
+use RevisionTen\CQRS\Interfaces\CommandInterface;
+
+final class <?= $commandName; ?>Command extends Command implements CommandInterface
+{
+    /**
+     * {@inheritdoc}
+     */
+    public function getHandlerClass(): string
+    {
+        return <?= $commandName; ?>Handler::class;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getAggregateClass(): string
+    {
+        return <?= $aggregateClass; ?>::class;
+    }
+}

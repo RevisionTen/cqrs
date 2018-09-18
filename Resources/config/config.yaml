@@ -12,6 +12,10 @@ services:
         autowire: true
         arguments:
             $env: '%kernel.environment%'
+    RevisionTen\CQRS\Maker\CommandMaker:
+        public: true
+        autowire: true
+        tags: [maker.command]
 
 doctrine:
     orm:
