@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace <?= $namespace; ?>\Command;
+namespace <?= $bundleNamespace; ?>\Command;
 
-use <?= $namespace; ?>\Handler\<?= $commandName; ?>Handler;
+use <?= $bundleNamespace; ?>\Handler\<?= $commandName; ?>Handler;
 use <?= $aggregateNamespace; ?>\<?= $aggregateClass; ?>;
 use RevisionTen\CQRS\Command\Command;
 use RevisionTen\CQRS\Interfaces\CommandInterface;

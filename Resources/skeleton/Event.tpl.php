@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace <?= $namespace; ?>\Event;
+namespace <?= $bundleNamespace; ?>\Event;
 
-use <?= $namespace; ?>\Command\<?= $commandName; ?>Command;
-use <?= $namespace; ?>\Listener\<?= $commandName; ?>Listener;
+use <?= $bundleNamespace; ?>\Command\<?= $commandName; ?>Command;
+use <?= $bundleNamespace; ?>\Listener\<?= $commandName; ?>Listener;
 use RevisionTen\CQRS\Event\Event;
 use RevisionTen\CQRS\Interfaces\EventInterface;
 

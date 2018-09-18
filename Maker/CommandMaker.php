@@ -25,9 +25,9 @@ class CommandMaker extends AbstractMaker
         $command
             ->setDescription('Creates a new cqrs command')
             ->addArgument('commandName', InputArgument::REQUIRED, 'Choose a name for your command (e.g. <fg=yellow>PageCreate</>)')
-            ->addArgument('namespace', InputArgument::REQUIRED, 'Namespace for your command (e.g. <fg=yellow>App</>)')
-            ->addArgument('aggregateClass', InputArgument::REQUIRED, 'Your aggregates namespace (e.g. <fg=yellow>RevisionTen\CMS\Model</>)')
-            ->addArgument('aggregateNamespace', InputArgument::REQUIRED, 'Your aggregates classname (e.g. <fg=yellow>Page</>)')
+            ->addArgument('bundleNamespace', InputArgument::REQUIRED, 'Namespace for your command (e.g. <fg=yellow>App</>)')
+            ->addArgument('aggregateNamespace', InputArgument::REQUIRED, 'Your aggregates namespace (e.g. <fg=yellow>RevisionTen\CMS\Model</>)')
+            ->addArgument('aggregateClass', InputArgument::REQUIRED, 'Your aggregates classname (e.g. <fg=yellow>Page</>)')
             ->addArgument('eventText', InputArgument::REQUIRED, 'Your events log message (e.g. <fg=yellow>Page Created</>)')
         ;
     }
@@ -35,24 +35,58 @@ class CommandMaker extends AbstractMaker
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
         $commandName = $input->getArgument('commandName');
-        $namespace = $input->getArgument('namespace');
+        $bundleNamespace = $input->getArgument('bundleNamespace');
         $aggregateClass = $input->getArgument('aggregateClass');
         $aggregateNamespace = $input->getArgument('aggregateNamespace');
         $eventText = $input->getArgument('eventText');
 
-        $generator->generateClass($namespace.'\\'.$commandName.'Command',
-            'Command.tpl.php',
-            [
-                'commandName' => $commandName,
-                'namespace' => $namespace,
-                'aggregateClass' => $aggregateClass,
-                'aggregateNamespace' => $aggregateNamespace,
-                'eventText' => $eventText,
-            ]
-        );
+        if (class_exists($aggregateNamespace.'\\'.$aggregateClass)) {
+            $generator->generateClass($bundleNamespace.'\\Command\\'.$commandName.'Command',
+                __DIR__.'/../Resources/skeleton/Command.tpl.php',
+                [
+                    'commandName' => $commandName,
+                    'bundleNamespace' => $bundleNamespace,
+                    'aggregateClass' => $aggregateClass,
+                    'aggregateNamespace' => $aggregateNamespace,
+                    'eventText' => $eventText,
+                ]
+            );
+            $generator->generateClass($bundleNamespace.'\\Event\\'.$commandName.'Event',
+                __DIR__.'/../Resources/skeleton/Event.tpl.php',
+                [
+                    'commandName' => $commandName,
+                    'bundleNamespace' => $bundleNamespace,
+                    'aggregateClass' => $aggregateClass,
+                    'aggregateNamespace' => $aggregateNamespace,
+                    'eventText' => $eventText,
+                ]
+            );
+            $generator->generateClass($bundleNamespace.'\\Handler\\'.$commandName.'Handler',
+                __DIR__.'/../Resources/skeleton/Handler.tpl.php',
+                [
+                    'commandName' => $commandName,
+                    'bundleNamespace' => $bundleNamespace,
+                    'aggregateClass' => $aggregateClass,
+                    'aggregateNamespace' => $aggregateNamespace,
+                    'eventText' => $eventText,
+                ]
+            );
+            $generator->generateClass($bundleNamespace.'\\Listener\\'.$commandName.'Listener',
+                __DIR__.'/../Resources/skeleton/Listener.tpl.php',
+                [
+                    'commandName' => $commandName,
+                    'bundleNamespace' => $bundleNamespace,
+                    'aggregateClass' => $aggregateClass,
+                    'aggregateNamespace' => $aggregateNamespace,
+                    'eventText' => $eventText,
+                ]
+            );
 
-        $generator->writeChanges();
-        $this->writeSuccessMessage($io);
+            $generator->writeChanges();
+            $this->writeSuccessMessage($io);
+        } else {
+            $io->text('<error>Aggregate does not exist</error>');
+        }
     }
 
     public function configureDependencies(DependencyBuilder $dependencies)

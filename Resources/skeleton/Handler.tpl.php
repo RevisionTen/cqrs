@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace <?= $namespace; ?>\Handler;
+namespace <?= $bundleNamespace; ?>\Handler;
 
-use <?= $namespace; ?>\Command\<?= $commandName; ?>Command;
-use <?= $namespace; ?>\Event\<?= $commandName; ?>Event;
+use <?= $bundleNamespace; ?>\Command\<?= $commandName; ?>Command;
+use <?= $bundleNamespace; ?>\Event\<?= $commandName; ?>Event;
 use <?= $aggregateNamespace; ?>\<?= $aggregateClass; ?>;
 use RevisionTen\CQRS\Interfaces\AggregateInterface;
 use RevisionTen\CQRS\Interfaces\CommandInterface;

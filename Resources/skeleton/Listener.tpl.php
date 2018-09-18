@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace <?= $namespace; ?>\Listener;
+namespace <?= $bundleNamespace; ?>\Listener;
 
 use RevisionTen\CQRS\Interfaces\EventInterface;
 use RevisionTen\CQRS\Interfaces\ListenerInterface;
