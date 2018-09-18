@@ -1,6 +1,10 @@
 # revision-ten/cqrs
 A basic CQRS Implementation.
 
+To create boilerplate code for your commands run:
+
+`bin/console make:cqrscommand`
+
 ### Recommended class naming convention and requirements
 
 ##### Aggregate class:
