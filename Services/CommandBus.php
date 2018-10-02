@@ -13,11 +13,6 @@ use RevisionTen\CQRS\Message\Message;
 class CommandBus
 {
     /**
-     * @var EventStore
-     */
-    private $eventStore;
-
-    /**
      * @var EventBus
      */
     private $eventBus;
@@ -26,11 +21,6 @@ class CommandBus
      * @var MessageBus
      */
     private $messageBus;
-
-    /**
-     * @var SnapshotStore
-     */
-    private $snapshotStore;
 
     /**
      * @var AggregateFactory
@@ -45,18 +35,14 @@ class CommandBus
     /**
      * CommandBus constructor.
      *
-     * @param EventStore       $eventStore
      * @param EventBus         $eventBus
      * @param MessageBus       $messageBus
-     * @param SnapshotStore    $snapshotStore
      * @param AggregateFactory $aggregateFactory
      */
-    public function __construct(EventStore $eventStore, EventBus $eventBus, MessageBus $messageBus, SnapshotStore $snapshotStore, AggregateFactory $aggregateFactory)
+    public function __construct(EventBus $eventBus, MessageBus $messageBus, AggregateFactory $aggregateFactory)
     {
-        $this->eventStore = $eventStore;
         $this->eventBus = $eventBus;
         $this->messageBus = $messageBus;
-        $this->snapshotStore = $snapshotStore;
         $this->aggregateFactory = $aggregateFactory;
     }
 
