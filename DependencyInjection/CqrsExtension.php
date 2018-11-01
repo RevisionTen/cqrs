@@ -12,19 +12,11 @@ class CqrsExtension extends Extension implements PrependExtensionInterface
 {
     public function load(array $configs, ContainerBuilder $container)
     {
-        $config = $this->processConfiguration(new Configuration(), $configs);
-        $container->setParameter('cqrs', $config);
     }
 
     public function prepend(ContainerBuilder $container)
     {
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('config.yaml');
-
-        $config = $container->getExtensionConfig('cqrs')[0];
-        if (empty($config)) {
-            // Load default cms bundle config.
-            $loader->load('cqrs.yaml');
-        }
     }
 }

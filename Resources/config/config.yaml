@@ -1,5 +1,5 @@
 services:
-    messagebus:
+    messagebus: # Todo: Remove this alias once the forms bundle is cleaned up.
         alias: RevisionTen\CQRS\Services\MessageBus
         public: true
     RevisionTen\CQRS\Services\:

@@ -1,3 +1,0 @@
-#controllers:
-#    resource: "@CqrsBundle/Controller/"
-#    type: annotation
