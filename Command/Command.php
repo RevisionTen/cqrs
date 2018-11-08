@@ -91,9 +91,9 @@ abstract class Command
     }
 
     /**
-     * @return callable
+     * @return callable|null
      */
-    public function getListener(): callable
+    public function getListener(): ?callable
     {
         return $this->listener;
     }
