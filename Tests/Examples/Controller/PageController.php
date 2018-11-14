@@ -15,7 +15,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 class PageController extends Controller
 {
-    public function createPage($title)
+    public function createPage(CommandBus $commandBus, AggregateFactory $aggregateFactory, string $title)
     {
         $aggregateUuid = Uuid::uuid1()->toString();
 
@@ -27,14 +27,12 @@ class PageController extends Controller
         ], $successCallback);
 
         // Execute Command.
-        $this->get('commandbus')->dispatch($pageCreateCommand);
+        $commandBus->dispatch($pageCreateCommand);
 
         if (!$success) {
             return new Response('fail', 500);
         }
 
-        /** @var AggregateFactory $aggregateFactory */
-        $aggregateFactory = $this->get('aggregatefactory');
         $aggregate = $aggregateFactory->build($aggregateUuid, Page::class);
 
         return new JsonResponse($aggregate ?? 'fail', 200);

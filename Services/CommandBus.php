@@ -79,15 +79,15 @@ class CommandBus
                         /** @var array $pendingEvents */
                         $pendingEvents = $aggregate->getPendingEvents();
 
-                        $events = $events + $pendingEvents;
+                        $events += $pendingEvents;
                     }
 
                     $this->eventBus->publish($events, $this, $qeueEvents);
                 } else {
-                    throw new InterfaceException(get_class($handler).' must implement '.HandlerInterface::class);
+                    throw new InterfaceException(\get_class($handler).' must implement '.HandlerInterface::class);
                 }
             } else {
-                throw new InterfaceException(get_class($command).' must implement '.CommandInterface::class);
+                throw new InterfaceException(\get_class($command).' must implement '.CommandInterface::class);
             }
         } catch (InterfaceException $e) {
             $this->messageBus->dispatch(new Message(

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace RevisionTen\CQRS\Interfaces;
 
-use RevisionTen\CQRS\Model\Snapshot;
-
 interface AggregateInterface
 {
     /**

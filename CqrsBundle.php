@@ -9,27 +9,27 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class CqrsBundle extends Bundle
 {
-    const VERSION = '1.0.1';
+    public const VERSION = '1.0.2';
 
     private function setConstants()
     {
-        if (!defined('CODE_BAD_REQUEST')) {
-            define('CODE_BAD_REQUEST', 400);
+        if (!\defined('CODE_BAD_REQUEST')) {
+            \define('CODE_BAD_REQUEST', 400);
         }
-        if (!defined('CODE_OK')) {
-            define('CODE_OK', 200);
+        if (!\defined('CODE_OK')) {
+            \define('CODE_OK', 200);
         }
-        if (!defined('CODE_CREATED')) {
-            define('CODE_CREATED', 201);
+        if (!\defined('CODE_CREATED')) {
+            \define('CODE_CREATED', 201);
         }
-        if (!defined('CODE_ERROR')) {
-            define('CODE_ERROR', 500);
+        if (!\defined('CODE_ERROR')) {
+            \define('CODE_ERROR', 500);
         }
-        if (!defined('CODE_DEFAULT')) {
-            define('CODE_DEFAULT', 0);
+        if (!\defined('CODE_DEFAULT')) {
+            \define('CODE_DEFAULT', 0);
         }
-        if (!defined('CODE_CONFLICT')) {
-            define('CODE_CONFLICT', 409);
+        if (!\defined('CODE_CONFLICT')) {
+            \define('CODE_CONFLICT', 409);
         }
     }
 

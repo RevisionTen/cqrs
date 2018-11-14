@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace RevisionTen\CQRS\Services;
 
+use RevisionTen\CQRS\Event\AggregateUpdatedEvent;
 use RevisionTen\CQRS\Exception\InterfaceException;
 use RevisionTen\CQRS\Interfaces\EventInterface;
 use RevisionTen\CQRS\Interfaces\ListenerInterface;
@@ -12,6 +13,7 @@ use RevisionTen\CQRS\Model\EventQeueObject;
 use RevisionTen\CQRS\Model\EventStreamObject;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class EventBus
 {
@@ -31,17 +33,24 @@ class EventBus
     private $container;
 
     /**
+     * @var EventDispatcherInterface
+     */
+    private $eventDispatcher;
+
+    /**
      * EventBus constructor.
      *
-     * @param EventStore         $eventStore
-     * @param MessageBus         $messageBus
-     * @param ContainerInterface $container
+     * @param EventStore               $eventStore
+     * @param MessageBus               $messageBus
+     * @param ContainerInterface       $container
+     * @param EventDispatcherInterface $eventDispatcher
      */
-    public function __construct(EventStore $eventStore, MessageBus $messageBus, ContainerInterface $container)
+    public function __construct(EventStore $eventStore, MessageBus $messageBus, ContainerInterface $container, EventDispatcherInterface $eventDispatcher)
     {
         $this->eventStore = $eventStore;
         $this->messageBus = $messageBus;
         $this->container = $container;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
@@ -63,7 +72,7 @@ class EventBus
             $eventStreamObject->setCommandUuid($event->getCommand()->getUuid());
             $eventStreamObject->setPayload($event->getCommand()->getPayload());
             $eventStreamObject->setMessage($event->getMessage());
-            $eventStreamObject->setEvent(get_class($event));
+            $eventStreamObject->setEvent(\get_class($event));
             $eventStreamObject->setAggregateClass($event->getCommand()->getAggregateClass());
             $eventStreamObject->setVersion($event->getCommand()->getOnVersion() + 1);
             $eventStreamObject->setUser($event->getCommand()->getUser());
@@ -78,8 +87,8 @@ class EventBus
 
         try {
             $this->eventStore->save();
-            // Listeners are called even if the events are just qeued.
-            // They are not called again when the events are persisted to the event stream.
+            // Listeners are called even if the events are just qeued!
+            // They are not called again when the events are persisted to the event stream!
             $this->invokeListeners($events, $commandBus);
         } catch (\Exception $e) {
             // Saving to the Event Store failed. This can happen for example when an aggregate version is already taken.
@@ -211,7 +220,7 @@ class EventBus
             $callable = $event->getCommand()->getListener();
             if (null !== $callable) {
                 try {
-                    if (is_callable($callable)) {
+                    if (\is_callable($callable)) {
                         $callable($commandBus, $event);
                     } else {
                         throw new \Exception('Passed listener is not callable');
@@ -226,6 +235,10 @@ class EventBus
                     ));
                 }
             }
+
+            // Send update event to aggregate subscribers.
+            // Subscribers are notified AFTER the events listeners are processed.
+            $this->eventDispatcher->dispatch(AggregateUpdatedEvent::NAME, new AggregateUpdatedEvent($event));
         }
     }
 }
