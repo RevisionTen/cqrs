@@ -54,7 +54,7 @@ class MessageBus
     public function getMessagesJson(): array
     {
         $messages = [];
-        $debug = is_string($this->env) ? ('dev' === $this->env ? true : false) : $this->env->isDebug();
+        $debug = \is_string($this->env) && 'dev' === $this->env ?: $this->env->isDebug();
 
         foreach ($this->messages as $message) {
             if ($debug && $message->exception) {

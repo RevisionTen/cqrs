@@ -46,21 +46,15 @@ class SnapshotStore
      */
     public function find($uuid, $max_version = null): ?Snapshot
     {
+        $criteria = new Criteria();
+        $criteria->where(Criteria::expr()->eq('uuid', $uuid));
+
         if (null !== $max_version) {
-            $criteria = new Criteria();
-            $criteria
-                ->where($criteria->expr()->eq('uuid', $uuid))
-                ->andWhere($criteria->expr()->lte('version', $max_version))
-                ->orderBy(['version' => Criteria::DESC])
-            ;
-            $snapshot = $this->em->getRepository(Snapshot::class)->matching($criteria)->first();
-        } else {
-            $snapshot = $this->em->getRepository(Snapshot::class)->findOneBy([
-                'uuid' => $uuid,
-            ], [
-                'version' => Criteria::DESC,
-            ]);
+            $criteria->andWhere(Criteria::expr()->lte('version', $max_version));
         }
+
+        $criteria->orderBy(['version' => Criteria::DESC]);
+        $snapshot = $this->em->getRepository(Snapshot::class)->matching($criteria)->first();
 
         return $snapshot instanceof Snapshot ? $snapshot : null;
     }
@@ -77,7 +71,7 @@ class SnapshotStore
         $snapshot->setVersion($aggregate->getVersion());
         $snapshot->setAggregateCreated($aggregate->getCreated());
         $snapshot->setAggregateModified($aggregate->getModified());
-        $snapshot->setAggregateClass(get_class($aggregate));
+        $snapshot->setAggregateClass(\get_class($aggregate));
         $snapshot->setHistory($aggregate->getHistory());
         $aggregateData = json_decode(json_encode($aggregate), true);
         $snapshot->setPayload($aggregateData);

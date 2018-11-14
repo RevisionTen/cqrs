@@ -93,9 +93,7 @@ abstract class Handler
      */
     public function getAggregate(string $uuid, string $aggregateClass, int $user): AggregateInterface
     {
-        $aggregate = $this->aggregateFactory->build($uuid, $aggregateClass, null, $user);
-
-        return $aggregate;
+        return $this->aggregateFactory->build($uuid, $aggregateClass, null, $user);
     }
 
     /**
@@ -142,7 +140,7 @@ abstract class Handler
 
                     $aggregates[] = $aggregate;
                 } else {
-                    throw new InterfaceException(get_class($event).' must implement '.EventInterface::class);
+                    throw new InterfaceException(\get_class($event).' must implement '.EventInterface::class);
                 }
             } catch (InterfaceException $e) {
                 $this->messageBus->dispatch(new Message(

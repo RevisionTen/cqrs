@@ -43,6 +43,7 @@ class Message
      * @param int    $code
      * @param null   $commandUuid
      * @param null   $aggregateUuid
+     * @param null   $exception
      */
     public function __construct(string $message, int $code, $commandUuid = null, $aggregateUuid = null, $exception = null)
     {

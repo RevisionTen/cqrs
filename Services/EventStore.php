@@ -48,7 +48,7 @@ class EventStore
 
         $eventStreamObjects = $this->em->getRepository(EventStreamObject::class)->findBy($criteria);
 
-        return is_array($eventStreamObjects) ? $eventStreamObjects : [];
+        return \is_array($eventStreamObjects) ? $eventStreamObjects : [];
     }
 
     /**
@@ -99,26 +99,26 @@ class EventStore
     public function findEventObjects(string $objectClass, string $uuid, int $max_version = null, int $min_version = null, int $user = null): array
     {
         $criteria = new Criteria();
-        $criteria->where($criteria->expr()->eq('uuid', $uuid));
+
+        $criteria->where(Criteria::expr()->eq('uuid', $uuid));
 
         if (null !== $max_version) {
-            $criteria->andWhere($criteria->expr()->lte('version', $max_version));
+            $criteria->andWhere(Criteria::expr()->lte('version', $max_version));
         }
 
         if (null !== $min_version) {
-            $criteria->andWhere($criteria->expr()->gte('version', $min_version));
+            $criteria->andWhere(Criteria::expr()->gte('version', $min_version));
         }
 
         if (null !== $user) {
-            $criteria->andWhere($criteria->expr()->eq('user', $user));
+            $criteria->andWhere(Criteria::expr()->eq('user', $user));
         }
 
         $criteria->orderBy(['version' => Criteria::ASC]);
 
         $eventObjectsResults = $this->em->getRepository($objectClass)->matching($criteria);
-        $eventObjects = $eventObjectsResults ? $eventObjectsResults->toArray() : [];
 
-        return $eventObjects;
+        return $eventObjectsResults ? $eventObjectsResults->toArray() : [];
     }
 
     /**

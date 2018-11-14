@@ -168,7 +168,7 @@ class Snapshot
      */
     public function getPayload(): array
     {
-        return is_string($this->payload) ? json_decode($this->payload, true) : $this->payload;
+        return \is_string($this->payload) ? json_decode($this->payload, true) : $this->payload;
     }
 
     /**
@@ -255,7 +255,7 @@ class Snapshot
      */
     public function getHistory(): array
     {
-        return is_string($this->history) ? json_decode($this->history, true) : $this->history;
+        return \is_string($this->history) ? json_decode($this->history, true) : $this->history;
     }
 
     /**

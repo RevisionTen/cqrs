@@ -25,40 +25,40 @@ interface CommandInterface
      *
      * @return array
      */
-    public function getPayload();
+    public function getPayload(): array;
 
     /**
      * Implemented by abstract Command class.
      *
      * @return string
      */
-    public function getAggregateUuid();
+    public function getAggregateUuid(): string;
 
     /**
      * Implemented by abstract Command class.
      *
      * @return string
      */
-    public function getUuid();
+    public function getUuid(): string;
 
     /**
      * Implemented by abstract Command class.
      *
      * @return callable
      */
-    public function getListener();
+    public function getListener(): ?callable;
 
     /**
      * Implemented by abstract Command class.
      *
      * @return int
      */
-    public function getOnVersion();
+    public function getOnVersion(): int;
 
     /**
      * Implemented by abstract Command class.
      *
      * @return int
      */
-    public function getUser();
+    public function getUser(): int;
 }

@@ -53,19 +53,7 @@ final class PageCreateHandler extends Handler implements HandlerInterface
     {
         $payload = $command->getPayload();
 
-        if (0 === $aggregate->getVersion() && isset($payload['title']) && !empty($payload['title'])) {
-            return true;
-        }
-        if (0 !== $aggregate->getVersion()) {
-            $this->messageBus->dispatch(new Message(
-                'Aggregate already exists',
-                CODE_CONFLICT,
-                $command->getUuid(),
-                $command->getAggregateUuid()
-            ));
-
-            return false;
-        } else {
+        if (empty($payload['title'])) {
             $this->messageBus->dispatch(new Message(
                 'You must enter a title',
                 CODE_BAD_REQUEST,
@@ -75,5 +63,18 @@ final class PageCreateHandler extends Handler implements HandlerInterface
 
             return false;
         }
+
+        if (0 !== $aggregate->getVersion()) {
+            $this->messageBus->dispatch(new Message(
+                'Aggregate already exists',
+                CODE_CONFLICT,
+                $command->getUuid(),
+                $command->getAggregateUuid()
+            ));
+
+            return false;
+        }
+
+        return true;
     }
 }

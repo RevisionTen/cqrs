@@ -157,7 +157,7 @@ class AggregateFactory
     public function loadFromHistory(AggregateInterface $aggregate, array $eventStreamObjects): AggregateInterface
     {
         // Arrays start at zero ;)
-        $count = (int) count($eventStreamObjects) - 1;
+        $count = \count($eventStreamObjects) - 1;
 
         /**
          * Get events and replay them.
