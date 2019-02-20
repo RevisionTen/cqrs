@@ -77,12 +77,24 @@ class EventBus
             $eventStreamObject->setVersion($event->getCommand()->getOnVersion() + 1);
             $eventStreamObject->setUser($event->getCommand()->getUser());
 
+
             if ($qeueEvents) {
                 $eventQeueObject = new EventQeueObject($eventStreamObject);
                 $this->eventStore->qeue($eventQeueObject);
+                $message = 'Qeued event: '.$event->getMessage();
             } else {
                 $this->eventStore->add($eventStreamObject);
+                $message = 'Persisted event: '.$event->getMessage();
             }
+
+            $this->messageBus->dispatch(new Message(
+                $message,
+                $event::getCode(),
+                $event->getCommand()->getUuid(),
+                $event->getCommand()->getAggregateUuid(),
+                null,
+                $event->getCommand()->getPayload()
+            ));
         }
 
         try {
@@ -175,14 +187,6 @@ class EventBus
          * @var EventInterface $event
          */
         foreach ($events as $event) {
-            $this->messageBus->dispatch(new Message(
-                $event->getMessage(),
-                $event::getCode(),
-                $event->getCommand()->getUuid(),
-                $event->getCommand()->getAggregateUuid(),
-                null
-            ));
-
             // Execute the regular Event Listener.
             $eventListenerClass = $event::getListenerClass();
 

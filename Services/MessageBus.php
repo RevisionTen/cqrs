@@ -5,9 +5,15 @@ declare(strict_types=1);
 namespace RevisionTen\CQRS\Services;
 
 use RevisionTen\CQRS\Message\Message;
+use Psr\Log\LoggerInterface;
 
 class MessageBus
 {
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
     /**
      * @var array
      */
@@ -18,8 +24,9 @@ class MessageBus
      */
     private $env;
 
-    public function __construct($env)
+    public function __construct(LoggerInterface $logger, $env)
     {
+        $this->logger = $logger;
         $this->env = $env;
     }
 
@@ -31,6 +38,9 @@ class MessageBus
     public function dispatch(Message $message): void
     {
         $this->messages[] = $message;
+
+        // Add message to debug log.
+        $this->logger->debug($message->message, $message->context);
     }
 
     /**

@@ -9,7 +9,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class CqrsBundle extends Bundle
 {
-    public const VERSION = '1.0.2';
+    public const VERSION = '1.0.3';
 
     private function setConstants()
     {

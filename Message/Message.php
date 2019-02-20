@@ -37,15 +37,21 @@ class Message
     public $exception;
 
     /**
+     * @var array|null
+     */
+    public $context;
+
+    /**
      * Message constructor.
      *
-     * @param string $message
-     * @param int    $code
-     * @param null   $commandUuid
-     * @param null   $aggregateUuid
-     * @param null   $exception
+     * @param string      $message
+     * @param int         $code
+     * @param string|NULL $commandUuid
+     * @param string|NULL $aggregateUuid
+     * @param null        $exception
+     * @param array|NULL  $context
      */
-    public function __construct(string $message, int $code, $commandUuid = null, $aggregateUuid = null, $exception = null)
+    public function __construct(string $message, int $code, string $commandUuid = null, string $aggregateUuid = null, $exception = null, array $context = null)
     {
         $this->message = $message;
         $this->code = $code;
@@ -53,5 +59,6 @@ class Message
         $this->aggregateUuid = $aggregateUuid;
         $this->created = new \DateTimeImmutable();
         $this->exception = $exception;
+        $this->context = $context;
     }
 }

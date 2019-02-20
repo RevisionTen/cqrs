@@ -12,6 +12,8 @@ services:
         autowire: true
         arguments:
             $env: '%kernel.environment%'
+        tags:
+            - { name: monolog.logger, channel: cqrs }
     RevisionTen\CQRS\Maker\CommandMaker:
         public: true
         autowire: true
