@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.3] - 2019-02-20
 ### Added
 - Added optional context array property to Message
+- Added monolog dependency
 ### Changed
 - Add all messages to debug log
 
