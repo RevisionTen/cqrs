@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace RevisionTen\CQRS\Services;
 
+use RevisionTen\CQRS\Interfaces\EventInterface;
 use RevisionTen\CQRS\Message\Message;
 use RevisionTen\CQRS\Model\EventQeueObject;
 use RevisionTen\CQRS\Model\EventStreamObject;
@@ -34,6 +35,31 @@ class EventStore
     {
         $this->em = $em;
         $this->messageBus = $messageBus;
+    }
+
+    /**
+     * @param EventStreamObject $eventStreamObject
+     *
+     * @return EventInterface
+     */
+    public static function buildEventFromEventStreamObject(EventStreamObject $eventStreamObject): EventInterface
+    {
+        /** @var EventInterface $eventClass */
+        $eventClass = $eventStreamObject->getEvent();
+        /** @var \RevisionTen\CQRS\Interfaces\CommandInterface $commandClass */
+        $commandClass = $eventClass::getCommandClass();
+
+        $user = $eventStreamObject->getUser();
+        $commandUuid = $eventStreamObject->getCommandUuid();
+        $uuid = $eventStreamObject->getUuid();
+        // Its safe to assume the command was created on the previous version, it would have failed otherwise.
+        $onVersion = $eventStreamObject->getVersion() - 1;
+        $payload = $eventStreamObject->getPayload();
+
+        /** @var \RevisionTen\CQRS\Interfaces\CommandInterface $command */
+        $command = new $commandClass($user, $commandUuid, $uuid, $onVersion, $payload);
+
+        return new $eventClass($command);
     }
 
     public function findAggregates(string $aggregateClass = null): array
