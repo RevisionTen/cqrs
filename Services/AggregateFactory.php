@@ -172,10 +172,6 @@ class AggregateFactory
                 continue;
             }
 
-            /** @var EventInterface $eventClass */
-            $eventClass = $eventStreamObject->getEvent();
-            $payload = $eventStreamObject->getPayload();
-
             if (0 === $key && null === $aggregate->getCreated()) {
                 // Set Created from first EventStreamObject.
                 $aggregate->setCreated($eventStreamObject->getCreated());
@@ -186,21 +182,8 @@ class AggregateFactory
                 $aggregate->setModified($eventStreamObject->getCreated());
             }
 
-            /**
-             * Recreate command.
-             *
-             * @var CommandInterface $commandClass
-             */
-            $commandClass = $eventClass::getCommandClass();
-            // Its safe to assume the command was created on the previous version, it would have failed otherwise.
-            $onVersion = $eventStreamObject->getVersion() - 1;
-            $commandUuid = $eventStreamObject->getCommandUuid();
-            $user = $eventStreamObject->getUser();
-            /** @var CommandInterface $command */
-            $command = new $commandClass($user, $commandUuid, $uuid, $onVersion, $payload);
+            $event = EventStore::buildEventFromEventStreamObject($eventStreamObject);
 
-            /** @var EventInterface $event */
-            $event = new $eventClass($command);
             $aggregate = $this->apply($aggregate, $event);
 
             // Update the Aggregate history.

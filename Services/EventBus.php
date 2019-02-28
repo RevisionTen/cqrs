@@ -62,6 +62,7 @@ class EventBus
      */
     public function publish(array $events, CommandBus $commandBus, bool $qeueEvents = false): void
     {
+        $eventStreamObjects = [];
         /**
          * @var EventInterface $event
          */
@@ -77,7 +78,10 @@ class EventBus
             $eventStreamObject->setVersion($event->getCommand()->getOnVersion() + 1);
             $eventStreamObject->setUser($event->getCommand()->getUser());
 
+            // Add to list of eventStreamObjects so we can later notify aggregateSubscribers.
+            $eventStreamObjects[] = $eventStreamObject;
 
+            // Add the events to the eventStore.
             if ($qeueEvents) {
                 $eventQeueObject = new EventQeueObject($eventStreamObject);
                 $this->eventStore->qeue($eventQeueObject);
@@ -87,6 +91,7 @@ class EventBus
                 $message = 'Persisted event: '.$event->getMessage();
             }
 
+            // Dispatch messages about the events.
             $this->messageBus->dispatch(new Message(
                 $message,
                 $event::getCode(),
@@ -99,9 +104,17 @@ class EventBus
 
         try {
             $this->eventStore->save();
+
             // Listeners are called even if the events are just qeued!
             // They are not called again when the events are persisted to the event stream!
             $this->invokeListeners($events, $commandBus);
+
+            // Notify subscribers.
+            // Subscribers are notified AFTER the events listeners are processed.
+            // Subscribers are NOT notified of qeued events.
+            if (!$qeueEvents) {
+                $this->sendAggregateUpdates($eventStreamObjects);
+            }
         } catch (\Exception $e) {
             // Saving to the Event Store failed. This can happen for example when an aggregate version is already taken.
             $this->messageBus->dispatch(new Message(
@@ -139,6 +152,9 @@ class EventBus
 
         try {
             $this->eventStore->save();
+
+            // Notify subscribers.
+            $this->sendAggregateUpdates($eventStreamObjects);
         } catch (\Exception $e) {
             // Saving to the Event Store failed. This can happen for example when an aggregate version is already taken.
             $this->messageBus->dispatch(new Message(
@@ -176,6 +192,25 @@ class EventBus
             ));
 
             return false;
+        }
+    }
+
+    /**
+     * @param EventStreamObject[] $eventStreamObjects
+     */
+    private function sendAggregateUpdates(array $eventStreamObjects): void
+    {
+        // Get the last event of each aggregate.
+        $aggregates = [];
+        foreach ($eventStreamObjects as $eventStreamObject) {
+            $aggregates[$eventStreamObject->getUuid()] = $eventStreamObject;
+        }
+
+        // Notify subscribers of last event.
+        foreach ($aggregates as $lastEventStreamObject) {
+            // Rebuild last event.
+            $event = EventStore::buildEventFromEventStreamObject($lastEventStreamObject);
+            $this->eventDispatcher->dispatch(AggregateUpdatedEvent::NAME, new AggregateUpdatedEvent($event));
         }
     }
 
@@ -239,10 +274,6 @@ class EventBus
                     ));
                 }
             }
-
-            // Send update event to aggregate subscribers.
-            // Subscribers are notified AFTER the events listeners are processed.
-            $this->eventDispatcher->dispatch(AggregateUpdatedEvent::NAME, new AggregateUpdatedEvent($event));
         }
     }
 }
