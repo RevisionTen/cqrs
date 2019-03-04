@@ -40,7 +40,8 @@ class MessageBus
         $this->messages[] = $message;
 
         // Add message to debug log.
-        $this->logger->debug($message->message, $message->context);
+        $context = $message->context ?? [];
+        $this->logger->debug($message->message, $context);
     }
 
     /**
