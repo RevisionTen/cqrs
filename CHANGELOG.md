@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2019-06-03
+### Added
+- Added dependency to symfony/event-dispatcher ^4.3
+
 ## [1.0.6] - 2019-03-28
 ### Changed
 - Set utf8_unicode_ci collaction on uuid fields to make it MySQL 5.5. compatible
