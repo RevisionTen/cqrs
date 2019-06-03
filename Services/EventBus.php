@@ -14,6 +14,7 @@ use RevisionTen\CQRS\Model\EventStreamObject;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\EventDispatcher\LegacyEventDispatcherProxy;
 
 class EventBus
 {
@@ -50,7 +51,7 @@ class EventBus
         $this->eventStore = $eventStore;
         $this->messageBus = $messageBus;
         $this->container = $container;
-        $this->eventDispatcher = $eventDispatcher;
+        $this->eventDispatcher = LegacyEventDispatcherProxy::decorate($eventDispatcher);
     }
 
     /**
@@ -210,7 +211,7 @@ class EventBus
         foreach ($aggregates as $lastEventStreamObject) {
             // Rebuild last event.
             $event = EventStore::buildEventFromEventStreamObject($lastEventStreamObject);
-            $this->eventDispatcher->dispatch(AggregateUpdatedEvent::NAME, new AggregateUpdatedEvent($event));
+            $this->eventDispatcher->dispatch(new AggregateUpdatedEvent($event), AggregateUpdatedEvent::NAME);
         }
     }
 
