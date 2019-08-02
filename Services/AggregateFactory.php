@@ -188,6 +188,7 @@ class AggregateFactory
 
             // Update the Aggregate history.
             $aggregate->addToHistory([
+                'user' => $eventStreamObject->getUser(),
                 'version' => $eventStreamObject->getVersion(),
                 'message' => $eventStreamObject->getMessage(),
                 'created' => $eventStreamObject->getCreated(),
