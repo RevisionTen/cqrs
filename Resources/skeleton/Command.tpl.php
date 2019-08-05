@@ -11,12 +11,15 @@ use RevisionTen\CQRS\Interfaces\CommandInterface;
 
 final class <?= $commandName; ?>Command extends Command implements CommandInterface
 {
+    public const HANDLER = <?= $commandName; ?>Handler::class;
+    public const AGGREGATE = <?= $aggregateClass; ?>::class;
+
     /**
      * {@inheritdoc}
      */
     public function getHandlerClass(): string
     {
-        return <?= $commandName; ?>Handler::class;
+        return self::HANDLER;
     }
 
     /**
@@ -24,6 +27,6 @@ final class <?= $commandName; ?>Command extends Command implements CommandInterf
      */
     public function getAggregateClass(): string
     {
-        return <?= $aggregateClass; ?>::class;
+        return self::AGGREGATE;
     }
 }
