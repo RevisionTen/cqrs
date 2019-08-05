@@ -47,6 +47,40 @@ class CommandBus
     }
 
     /**
+     * A convenience method to dispatch a command.
+     *
+     * @param string   $commandClass
+     * @param string   $aggregateUuid
+     * @param array    $payload
+     * @param int|null $user
+     *
+     * @return bool
+     * @throws \RevisionTen\CQRS\Exception\InterfaceException
+     */
+    public function execute(string $commandClass, string $aggregateUuid, array $payload, ?int $user = -1): bool
+    {
+        if (!in_array(CommandInterface::class, class_implements($commandClass))) {
+            throw new InterfaceException($commandClass.' must implement '.CommandInterface::class);
+        }
+
+        if (!defined($commandClass.'::AGGREGATE')) {
+            throw new InterfaceException($commandClass.' must have public AGGREGATE constant');
+        }
+
+        $agregate = $this->aggregateFactory->build($aggregateUuid, $commandClass::AGGREGATE);
+        $agregateVersion = $agregate->getVersion();
+
+        $success = false;
+        $command = new $commandClass($user, null, $aggregateUuid, $agregateVersion, $payload, static function () use (&$success) {
+            $success = true;
+        });
+
+        $this->dispatch($command);
+
+        return $success;
+    }
+
+    /**
      * This function is used to dispatch a provided Command.
      *
      * @param CommandInterface $command
