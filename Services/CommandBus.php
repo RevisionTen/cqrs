@@ -49,15 +49,16 @@ class CommandBus
     /**
      * A convenience method to dispatch a command.
      *
-     * @param string   $commandClass
-     * @param string   $aggregateUuid
-     * @param array    $payload
-     * @param int|null $user
+     * @param string     $commandClass
+     * @param string     $aggregateUuid
+     * @param array|null $payload
+     * @param int|null   $user
+     * @param bool|null  $queueEvents
      *
      * @return bool
      * @throws \RevisionTen\CQRS\Exception\InterfaceException
      */
-    public function execute(string $commandClass, string $aggregateUuid, array $payload, ?int $user = -1): bool
+    public function execute(string $commandClass, string $aggregateUuid, ?array $payload = [], ?int $user = -1, ?bool $queueEvents = false): bool
     {
         if (!in_array(CommandInterface::class, class_implements($commandClass))) {
             throw new InterfaceException($commandClass.' must implement '.CommandInterface::class);
@@ -75,7 +76,7 @@ class CommandBus
             $success = true;
         });
 
-        $this->dispatch($command);
+        $this->dispatch($command, $queueEvents);
 
         return $success;
     }
@@ -84,9 +85,9 @@ class CommandBus
      * This function is used to dispatch a provided Command.
      *
      * @param CommandInterface $command
-     * @param bool             $qeueEvents
+     * @param bool             $queueEvents
      */
-    public function dispatch(CommandInterface $command, bool $qeueEvents = false): void
+    public function dispatch(CommandInterface $command, bool $queueEvents = false): void
     {
         try {
             if ($command instanceof CommandInterface) {
@@ -116,7 +117,7 @@ class CommandBus
                         $events += $pendingEvents;
                     }
 
-                    $this->eventBus->publish($events, $this, $qeueEvents);
+                    $this->eventBus->publish($events, $this, $queueEvents);
                 } else {
                     throw new InterfaceException(\get_class($handler).' must implement '.HandlerInterface::class);
                 }

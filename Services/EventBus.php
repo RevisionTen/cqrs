@@ -68,16 +68,19 @@ class EventBus
          * @var EventInterface $event
          */
         foreach ($events as $event) {
+            $command = $event->getCommand();
+
             // Save the event to the event stream.
             $eventStreamObject = new EventStreamObject();
-            $eventStreamObject->setUuid($event->getCommand()->getAggregateUuid());
-            $eventStreamObject->setCommandUuid($event->getCommand()->getUuid());
-            $eventStreamObject->setPayload($event->getCommand()->getPayload());
+            $eventStreamObject->setUuid($command->getAggregateUuid());
+            $eventStreamObject->setCommandUuid($command->getUuid());
+            $eventStreamObject->setPayload($command->getPayload());
+            $eventStreamObject->setAggregateClass($command->getAggregateClass());
+            $eventStreamObject->setVersion($command->getOnVersion() + 1);
+            $eventStreamObject->setUser($command->getUser());
+
             $eventStreamObject->setMessage($event->getMessage());
             $eventStreamObject->setEvent(\get_class($event));
-            $eventStreamObject->setAggregateClass($event->getCommand()->getAggregateClass());
-            $eventStreamObject->setVersion($event->getCommand()->getOnVersion() + 1);
-            $eventStreamObject->setUser($event->getCommand()->getUser());
 
             // Add to list of eventStreamObjects so we can later notify aggregateSubscribers.
             $eventStreamObjects[] = $eventStreamObject;
@@ -96,10 +99,10 @@ class EventBus
             $this->messageBus->dispatch(new Message(
                 $message,
                 $event::getCode(),
-                $event->getCommand()->getUuid(),
-                $event->getCommand()->getAggregateUuid(),
+                $command->getUuid(),
+                $command->getAggregateUuid(),
                 null,
-                $event->getCommand()->getPayload()
+                $command->getPayload()
             ));
         }
 
@@ -137,7 +140,7 @@ class EventBus
      */
     public function publishQeued(array $eventQeueObjects): bool
     {
-        $eventStreamObjects = array_map(function ($eventQeueObject) {
+        $eventStreamObjects = array_map(static function ($eventQeueObject) {
             /* @var EventQeueObject $eventQeueObject */
             return $eventQeueObject->getEventStreamObject();
         }, $eventQeueObjects);
