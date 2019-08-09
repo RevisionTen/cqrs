@@ -40,7 +40,7 @@ abstract class Command
     /**
      * Command constructor.
      *
-     * @param int|null      $user
+     * @param int           $user
      * @param string|null   $commandUuid
      * @param string        $aggregateUuid
      * @param int           $onVersion

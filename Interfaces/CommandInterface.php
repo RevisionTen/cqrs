@@ -7,6 +7,17 @@ namespace RevisionTen\CQRS\Interfaces;
 interface CommandInterface
 {
     /**
+     * CommandInterface constructor.
+     *
+     * @param int         $user
+     * @param string|NULL $commandUuid
+     * @param string      $aggregateUuid
+     * @param int         $onVersion
+     * @param array       $payload
+     */
+    public function __construct(int $user, string $commandUuid = null, string $aggregateUuid, int $onVersion, array $payload);
+
+    /**
      * Returns the Handler class associated with this Command.
      *
      * @return string
