@@ -265,7 +265,7 @@ class AggregateFactory
              */
             $handlerClass = $event::getHandlerClass();
             $handler = new $handlerClass($this->messageBus, $this);
-            $aggregate = $handler->executeHandler($event, $aggregate);
+            $aggregate = $handler->execute($event, $aggregate);
         }
 
         // Clear pending events.

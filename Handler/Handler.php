@@ -12,6 +12,13 @@ use RevisionTen\CQRS\Message\Message;
 use RevisionTen\CQRS\Services\AggregateFactory;
 use RevisionTen\CQRS\Services\MessageBus;
 
+/**
+ * Todo: Make this class useless.
+ *
+ * Class Handler
+ *
+ * @package RevisionTen\CQRS\Handler
+ */
 abstract class Handler
 {
     /** @var MessageBus|null */
@@ -30,49 +37,6 @@ abstract class Handler
     {
         $this->messageBus = $messageBus;
         $this->aggregateFactory = $aggregateFactory;
-    }
-
-    /**
-     * Returns a new Event instance of the Event class associated with this Handler.
-     *
-     * @param CommandInterface $command
-     *
-     * @return EventInterface
-     */
-    abstract public function createEvent(CommandInterface $command): EventInterface;
-
-    /**
-     * Returns true if the Command is valid, false otherwise.
-     *
-     * @param CommandInterface   $command
-     * @param AggregateInterface $aggregate
-     *
-     * @return bool
-     */
-    abstract public function validateCommand(CommandInterface $command, AggregateInterface $aggregate): bool;
-
-    /**
-     * Executes the business logic this Handler implements.
-     *
-     * @param EventInterface     $event
-     * @param AggregateInterface $aggregate
-     *
-     * @return AggregateInterface
-     */
-    abstract public function execute(EventInterface $event, AggregateInterface $aggregate): AggregateInterface;
-
-    /**
-     * A wrapper for the execute function.
-     *
-     * @param EventInterface     $event
-     * @param AggregateInterface $aggregate
-     *
-     * @return AggregateInterface
-     */
-    public function executeHandler(EventInterface $event, AggregateInterface $aggregate): AggregateInterface
-    {
-        /* Execute method is implemented in final class */
-        return $this->execute($event, $aggregate);
     }
 
     /**

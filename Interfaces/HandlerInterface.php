@@ -12,6 +12,8 @@ interface HandlerInterface
     /**
      * Handler constructor.
      *
+     * Todo: Make the params useless.
+     *
      * @param MessageBus       $messageBus
      * @param AggregateFactory $aggregateFactory
      */
@@ -38,6 +40,8 @@ interface HandlerInterface
     public function createEvent(CommandInterface $command): EventInterface;
 
     /**
+     * Todo: Remove the need for this.
+     *
      * Returns an Aggregate based on the provided uuid.
      *
      * @param string $uuid
@@ -57,16 +61,6 @@ interface HandlerInterface
      * @return bool
      */
     public function validateCommand(CommandInterface $command, AggregateInterface $aggregate): bool;
-
-    /**
-     * A wrapper for the execute function.
-     *
-     * @param EventInterface     $event
-     * @param AggregateInterface $aggregate
-     *
-     * @return AggregateInterface
-     */
-    public function executeHandler(EventInterface $event, AggregateInterface $aggregate): AggregateInterface;
 
     /**
      * Executes the business logic this Handler implements.
