@@ -11,14 +11,14 @@ interface CommandInterface
      *
      * @return string
      */
-    public function getHandlerClass(): string;
+    public static function getHandlerClass(): string;
 
     /**
      * Returns the Aggregate class associated with this Command.
      *
      * @return string
      */
-    public function getAggregateClass(): string;
+    public static function getAggregateClass(): string;
 
     /**
      * Implemented by abstract Command class.
@@ -40,13 +40,6 @@ interface CommandInterface
      * @return string
      */
     public function getUuid(): string;
-
-    /**
-     * Implemented by abstract Command class.
-     *
-     * @return callable
-     */
-    public function getListener(): ?callable;
 
     /**
      * Implemented by abstract Command class.

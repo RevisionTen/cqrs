@@ -6,7 +6,7 @@ namespace RevisionTen\CQRS\Services;
 
 use RevisionTen\CQRS\Interfaces\EventInterface;
 use RevisionTen\CQRS\Message\Message;
-use RevisionTen\CQRS\Model\EventQeueObject;
+use RevisionTen\CQRS\Model\EventQueueObject;
 use RevisionTen\CQRS\Model\EventStreamObject;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
@@ -46,20 +46,14 @@ class EventStore
     {
         /** @var EventInterface $eventClass */
         $eventClass = $eventStreamObject->getEvent();
-        /** @var \RevisionTen\CQRS\Interfaces\CommandInterface $commandClass */
-        $commandClass = $eventClass::getCommandClass();
 
-        $user = $eventStreamObject->getUser();
         $commandUuid = $eventStreamObject->getCommandUuid();
-        $uuid = $eventStreamObject->getUuid();
-        // Its safe to assume the command was created on the previous version, it would have failed otherwise.
-        $onVersion = $eventStreamObject->getVersion() - 1;
+        $aggregateUuid = $eventStreamObject->getUuid();
+        $version = $eventStreamObject->getVersion();
+        $user = $eventStreamObject->getUser();
         $payload = $eventStreamObject->getPayload();
 
-        /** @var \RevisionTen\CQRS\Interfaces\CommandInterface $command */
-        $command = new $commandClass($user, $commandUuid, $uuid, $onVersion, $payload);
-
-        return new $eventClass($command);
+        return new $eventClass($aggregateUuid, $commandUuid, $version, $user, $payload);
     }
 
     public function findAggregates(string $aggregateClass = null): array
@@ -92,23 +86,31 @@ class EventStore
     }
 
     /**
-     * Returns qeued Event Stream Objects for a given Uuid and User.
+     * Returns queued Event Stream Objects for a given Uuid and User.
      *
      * @param string   $uuid
+     * @param int      $user
      * @param int|null $max_version
      * @param int|null $min_version
-     * @param int      $user
      *
      * @return array
      */
+    public function findQueued(string $uuid, int $user, int $max_version = null, int $min_version = null): array
+    {
+        $eventQueueObjects = $this->findEventObjects(EventQueueObject::class, $uuid, $max_version, $min_version, $user);
+
+        return array_map(static function ($eventQueueObject) {
+            /* @var EventQueueObject $eventQueueObject */
+            return $eventQueueObject->getEventStreamObject();
+        }, $eventQueueObjects);
+    }
+
+    /**
+     * @deprecated Use findQueued instead.
+     */
     public function findQeued(string $uuid, int $max_version = null, int $min_version = null, int $user): array
     {
-        $eventQeueObjects = $this->findEventObjects(EventQeueObject::class, $uuid, $max_version, $min_version, $user);
-
-        return array_map(function ($eventQeueObject) {
-            /* @var EventQeueObject $eventQeueObject */
-            return $eventQeueObject->getEventStreamObject();
-        }, $eventQeueObjects);
+        return $this->findQueued($uuid, $user, $max_version, $min_version);
     }
 
     /**
@@ -142,7 +144,10 @@ class EventStore
 
         $criteria->orderBy(['version' => Criteria::ASC]);
 
-        $eventObjectsResults = $this->em->getRepository($objectClass)->matching($criteria);
+        /** @var \Doctrine\ORM\EntityRepository $entityRepository */
+        $entityRepository = $this->em->getRepository($objectClass);
+
+        $eventObjectsResults = $entityRepository->matching($criteria);
 
         return $eventObjectsResults ? $eventObjectsResults->toArray() : [];
     }
@@ -159,56 +164,80 @@ class EventStore
     }
 
     /**
-     * Adds an Event to the Event Qeue.
+     * Adds an Event to the Event Queue.
      * Events are not persisted until save() is called.
      *
-     * @param EventQeueObject $eventQeueObject
+     * @param EventQueueObject $eventQueueObject
      */
-    public function qeue(EventQeueObject $eventQeueObject): void
+    public function queue(EventQueueObject $eventQueueObject): void
     {
-        $this->em->persist($eventQeueObject);
+        $this->em->persist($eventQueueObject);
     }
 
     /**
-     * Removes an Event from the Event Qeue.
+     * @deprecated Use queue instead.
+     */
+    public function qeue(EventQueueObject $eventQueueObject): void
+    {
+        $this->queue($eventQueueObject);
+    }
+
+    /**
+     * Removes an Event from the Event Queue.
      * Events are not removed until save() is called.
      *
-     * @param EventQeueObject $eventQeueObject
+     * @param EventQueueObject $eventQueueObject
      */
-    public function remove(EventQeueObject $eventQeueObject): void
+    public function remove(EventQueueObject $eventQueueObject): void
     {
-        $this->em->remove($eventQeueObject);
+        $this->em->remove($eventQueueObject);
     }
 
     /**
-     * Discards qeued Events for a specific Aggregate and User.
+     * Discards queued Events for a specific Aggregate and User.
      *
      * @param string $uuid
      * @param int    $user
      */
-    public function discardQeued(string $uuid, int $user): void
+    public function discardQueued(string $uuid, int $user): void
     {
-        $eventQeueObjects = $this->findEventObjects(EventQeueObject::class, $uuid, null, null, $user);
-        foreach ($eventQeueObjects as $eventQeueObject) {
-            $this->remove($eventQeueObject);
+        $EventQueueObjects = $this->findEventObjects(EventQueueObject::class, $uuid, null, null, $user);
+        foreach ($EventQueueObjects as $EventQueueObject) {
+            $this->remove($EventQueueObject);
         }
         $this->save();
     }
 
     /**
-     * Discards the latest qeued Event for a specific Aggregate and User.
+     * @deprecated Use discardQueued instead.
+     */
+    public function discardQeued(string $uuid, int $user): void
+    {
+        $this->discardQueued($uuid, $user);
+    }
+
+    /**
+     * Discards the latest queued Event for a specific Aggregate and User.
      *
      * @param string $uuid
      * @param int    $user
      * @param int    $version
      */
-    public function discardLatestQeued(string $uuid, int $user, int $version): void
+    public function discardLatestQueued(string $uuid, int $user, int $version): void
     {
-        $eventQeueObjects = $this->findEventObjects(EventQeueObject::class, $uuid, null, $version, $user);
-        foreach ($eventQeueObjects as $eventQeueObject) {
-            $this->remove($eventQeueObject);
+        $EventQueueObjects = $this->findEventObjects(EventQueueObject::class, $uuid, null, $version, $user);
+        foreach ($EventQueueObjects as $EventQueueObject) {
+            $this->remove($EventQueueObject);
         }
         $this->save();
+    }
+
+    /**
+     * @deprecated Use discardLatestQueued instead.
+     */
+    public function discardLatestQeued(string $uuid, int $user, int $version): void
+    {
+        $this->discardLatestQueued($uuid, $user, $version);
     }
 
     /**

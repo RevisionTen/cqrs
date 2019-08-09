@@ -7,7 +7,7 @@ namespace RevisionTen\CQRS\Model;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Class EventQeueObject.
+ * Class EventQueueObject.
  *
  * @ORM\Entity
  * @ORM\Table(name="event_qeue", uniqueConstraints={
@@ -15,7 +15,7 @@ use Doctrine\ORM\Mapping as ORM;
  *          columns={"version", "uuid", "user"})
  * })
  */
-class EventQeueObject
+class EventQueueObject
 {
     /**
      * @var int
@@ -84,7 +84,7 @@ class EventQeueObject
     private $message;
 
     /**
-     * EventQeueObject constructor.
+     * EventQueueObject constructor.
      *
      * @param EventStreamObject $eventStreamObject
      */
@@ -102,7 +102,7 @@ class EventQeueObject
     }
 
     /**
-     * Transforms the EventQeueObject into an EventStreamObject
+     * Transforms the EventQueueObject into an EventStreamObject
      * and returns it.
      *
      * @return EventStreamObject
@@ -142,7 +142,7 @@ class EventQeueObject
     /**
      * @param string $uuid
      *
-     * @return EventQeueObject
+     * @return EventQueueObject
      */
     public function setUuid($uuid): self
     {
@@ -162,7 +162,7 @@ class EventQeueObject
     /**
      * @param string $commandUuid
      *
-     * @return EventQeueObject
+     * @return EventQueueObject
      */
     public function setCommandUuid(string $commandUuid): self
     {
@@ -182,7 +182,7 @@ class EventQeueObject
     /**
      * @param int $version
      *
-     * @return EventQeueObject
+     * @return EventQueueObject
      */
     public function setVersion($version): self
     {
@@ -203,7 +203,7 @@ class EventQeueObject
     /**
      * @param \DateTimeImmutable $created
      *
-     * @return EventQeueObject
+     * @return EventQueueObject
      */
     public function setCreated($created): self
     {
@@ -223,7 +223,7 @@ class EventQeueObject
     /**
      * @param string $event
      *
-     * @return EventQeueObject
+     * @return EventQueueObject
      */
     public function setEvent($event): self
     {
@@ -243,7 +243,7 @@ class EventQeueObject
     /**
      * @param string $aggregateClass
      *
-     * @return EventQeueObject
+     * @return EventQueueObject
      */
     public function setAggregateClass($aggregateClass): self
     {
@@ -263,7 +263,7 @@ class EventQeueObject
     /**
      * @param int $user
      *
-     * @return EventQeueObject
+     * @return EventQueueObject
      */
     public function setUser($user): self
     {
@@ -283,7 +283,7 @@ class EventQeueObject
     /**
      * @param array $payload
      *
-     * @return EventQeueObject
+     * @return EventQueueObject
      */
     public function setPayload($payload): self
     {
@@ -303,7 +303,7 @@ class EventQeueObject
     /**
      * @param string $message
      *
-     * @return EventQeueObject
+     * @return EventQueueObject
      */
     public function setMessage($message): self
     {
@@ -312,3 +312,5 @@ class EventQeueObject
         return $this;
     }
 }
+
+class_alias('RevisionTen\CQRS\Model\EventQueueObject', 'RevisionTen\CQRS\Model\EventQeueObject');

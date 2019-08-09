@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace RevisionTen\CQRS\Services;
 
+use Ramsey\Uuid\Uuid;
 use RevisionTen\CQRS\Exception\InterfaceException;
 use RevisionTen\CQRS\Interfaces\AggregateInterface;
 use RevisionTen\CQRS\Interfaces\CommandInterface;
@@ -55,39 +56,35 @@ class CommandBus
      * @param int|null   $user
      * @param bool|null  $queueEvents
      *
-     * @return bool
+     * @return bool Returns true if the command was accepted.
      * @throws \RevisionTen\CQRS\Exception\InterfaceException
      */
     public function execute(string $commandClass, string $aggregateUuid, ?array $payload = [], ?int $user = -1, ?bool $queueEvents = false): bool
     {
-        if (!in_array(CommandInterface::class, class_implements($commandClass))) {
+        if (!in_array(CommandInterface::class, class_implements($commandClass), true)) {
             throw new InterfaceException($commandClass.' must implement '.CommandInterface::class);
         }
 
-        if (!defined($commandClass.'::AGGREGATE')) {
-            throw new InterfaceException($commandClass.' must have public AGGREGATE constant');
-        }
-
-        $agregate = $this->aggregateFactory->build($aggregateUuid, $commandClass::AGGREGATE);
+        /** @var CommandInterface $commandClass */
+        $agregate = $this->aggregateFactory->build($aggregateUuid, $commandClass::getAggregateClass());
         $agregateVersion = $agregate->getVersion();
 
-        $success = false;
-        $command = new $commandClass($user, null, $aggregateUuid, $agregateVersion, $payload, static function () use (&$success) {
-            $success = true;
-        });
+        $commandUuid = Uuid::uuid1()->toString();
+        $command = new $commandClass($user, $commandUuid, $aggregateUuid, $agregateVersion, $payload);
 
-        $this->dispatch($command, $queueEvents);
-
-        return $success;
+        return $this->dispatch($command, $queueEvents);
     }
 
     /**
      * This function is used to dispatch a provided Command.
      *
-     * @param CommandInterface $command
-     * @param bool             $queueEvents
+     * @param \RevisionTen\CQRS\Interfaces\CommandInterface $command
+     * @param bool                                          $queueEvents
+     *
+     * @return bool Returns true if the command was accepted.
+     * @throws \Exception
      */
-    public function dispatch(CommandInterface $command, bool $queueEvents = false): void
+    public function dispatch(CommandInterface $command, bool $queueEvents = false): bool
     {
         try {
             if ($command instanceof CommandInterface) {
@@ -99,7 +96,7 @@ class CommandBus
                  *
                  * @var HandlerInterface $handler
                  */
-                $handlerClass = $command->getHandlerClass();
+                $handlerClass = $command::getHandlerClass();
                 $handler = new $handlerClass($this->messageBus, $this->aggregateFactory);
 
                 if ($handler instanceof HandlerInterface) {
@@ -133,5 +130,11 @@ class CommandBus
                 $e
             ));
         }
+
+        /** @var Message[] $messages */
+        $messages = $this->messageBus->getMessagesByCommand($command->getUuid());
+
+        // Returns true if the command was accepted.
+        return (!empty($messages) && CODE_OK === $messages[0]->code);
     }
 }

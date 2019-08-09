@@ -28,11 +28,6 @@ abstract class Command
     public $payload;
 
     /**
-     * @var callable
-     */
-    private $listener;
-
-    /**
      * @var int
      */
     private $onVersion;
@@ -46,24 +41,24 @@ abstract class Command
      * Command constructor.
      *
      * @param int|null      $user
-     * @param string|null   $uuid
+     * @param string|null   $commandUuid
      * @param string        $aggregateUuid
      * @param int           $onVersion
      * @param array         $payload
-     * @param callable|null $listener
+     *
+     * @throws \Exception
      */
-    public function __construct(int $user, string $uuid = null, string $aggregateUuid, int $onVersion, array $payload, callable $listener = null)
+    public function __construct(int $user, string $commandUuid = null, string $aggregateUuid, int $onVersion, array $payload)
     {
-        if (null === $uuid) {
-            $uuid = Uuid::uuid1()->toString();
+        if (null === $commandUuid) {
+            $commandUuid = Uuid::uuid1()->toString();
         }
 
         $this->user = $user;
-        $this->uuid = $uuid;
+        $this->uuid = $commandUuid;
         $this->aggregateUuid = $aggregateUuid;
         $this->onVersion = $onVersion;
         $this->payload = $payload;
-        $this->listener = $listener;
     }
 
     /**
@@ -88,14 +83,6 @@ abstract class Command
     public function getUuid(): string
     {
         return $this->uuid;
-    }
-
-    /**
-     * @return callable|null
-     */
-    public function getListener(): ?callable
-    {
-        return $this->listener;
     }
 
     /**

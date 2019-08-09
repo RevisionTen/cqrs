@@ -50,6 +50,8 @@ class Message
      * @param string|NULL $aggregateUuid
      * @param null        $exception
      * @param array|NULL  $context
+     *
+     * @throws \Exception
      */
     public function __construct(string $message, int $code, string $commandUuid = null, string $aggregateUuid = null, $exception = null, array $context = null)
     {

@@ -5,14 +5,10 @@ declare(strict_types=1);
 namespace RevisionTen\CQRS\Services;
 
 use RevisionTen\CQRS\Event\AggregateUpdatedEvent;
-use RevisionTen\CQRS\Exception\InterfaceException;
 use RevisionTen\CQRS\Interfaces\EventInterface;
-use RevisionTen\CQRS\Interfaces\ListenerInterface;
 use RevisionTen\CQRS\Message\Message;
-use RevisionTen\CQRS\Model\EventQeueObject;
+use RevisionTen\CQRS\Model\EventQueueObject;
 use RevisionTen\CQRS\Model\EventStreamObject;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\LegacyEventDispatcherProxy;
 
@@ -29,11 +25,6 @@ class EventBus
     private $messageBus;
 
     /**
-     * @var ContainerInterface
-     */
-    private $container;
-
-    /**
      * @var EventDispatcherInterface
      */
     private $eventDispatcher;
@@ -43,53 +34,52 @@ class EventBus
      *
      * @param EventStore               $eventStore
      * @param MessageBus               $messageBus
-     * @param ContainerInterface       $container
      * @param EventDispatcherInterface $eventDispatcher
      */
-    public function __construct(EventStore $eventStore, MessageBus $messageBus, ContainerInterface $container, EventDispatcherInterface $eventDispatcher)
+    public function __construct(EventStore $eventStore, MessageBus $messageBus, EventDispatcherInterface $eventDispatcher)
     {
         $this->eventStore = $eventStore;
         $this->messageBus = $messageBus;
-        $this->container = $container;
         $this->eventDispatcher = LegacyEventDispatcherProxy::decorate($eventDispatcher);
     }
 
     /**
      * Dispatch all events to observing event handlers and save them to the Event Store.
      *
-     * @param array      $events
-     * @param CommandBus $commandBus
-     * @param bool       $qeueEvents
+     * @param array                                 $events
+     * @param \RevisionTen\CQRS\Services\CommandBus $commandBus
+     * @param bool                                  $queueEvents
+     *
+     * @throws \Exception
      */
-    public function publish(array $events, CommandBus $commandBus, bool $qeueEvents = false): void
+    public function publish(array $events, CommandBus $commandBus, bool $queueEvents = false): void
     {
         $eventStreamObjects = [];
         /**
          * @var EventInterface $event
          */
         foreach ($events as $event) {
-            $command = $event->getCommand();
-
             // Save the event to the event stream.
             $eventStreamObject = new EventStreamObject();
-            $eventStreamObject->setUuid($command->getAggregateUuid());
-            $eventStreamObject->setCommandUuid($command->getUuid());
-            $eventStreamObject->setPayload($command->getPayload());
-            $eventStreamObject->setAggregateClass($command->getAggregateClass());
-            $eventStreamObject->setVersion($command->getOnVersion() + 1);
-            $eventStreamObject->setUser($command->getUser());
 
-            $eventStreamObject->setMessage($event->getMessage());
             $eventStreamObject->setEvent(\get_class($event));
+
+            $eventStreamObject->setAggregateClass($event::getAggregateClass());
+            $eventStreamObject->setMessage($event->getMessage());
+            $eventStreamObject->setUuid($event->getAggregateUuid());
+            $eventStreamObject->setCommandUuid($event->getCommandUuid());
+            $eventStreamObject->setPayload($event->getPayload());
+            $eventStreamObject->setVersion($event->getVersion());
+            $eventStreamObject->setUser($event->getUser());
 
             // Add to list of eventStreamObjects so we can later notify aggregateSubscribers.
             $eventStreamObjects[] = $eventStreamObject;
 
             // Add the events to the eventStore.
-            if ($qeueEvents) {
-                $eventQeueObject = new EventQeueObject($eventStreamObject);
-                $this->eventStore->qeue($eventQeueObject);
-                $message = 'Qeued event: '.$event->getMessage();
+            if ($queueEvents) {
+                $eventQueueObject = new EventQueueObject($eventStreamObject);
+                $this->eventStore->queue($eventQueueObject);
+                $message = 'Queued event: '.$event->getMessage();
             } else {
                 $this->eventStore->add($eventStreamObject);
                 $message = 'Persisted event: '.$event->getMessage();
@@ -98,25 +88,25 @@ class EventBus
             // Dispatch messages about the events.
             $this->messageBus->dispatch(new Message(
                 $message,
-                $event::getCode(),
-                $command->getUuid(),
-                $command->getAggregateUuid(),
+                CODE_OK,
+                $event->getCommandUuid(),
+                $event->getAggregateUuid(),
                 null,
-                $command->getPayload()
+                $event->getPayload()
             ));
         }
 
         try {
             $this->eventStore->save();
 
-            // Listeners are called even if the events are just qeued!
-            // They are not called again when the events are persisted to the event stream!
-            $this->invokeListeners($events, $commandBus);
+            // Notify subscribers and event listeners.
+            // Events are dispatched even if the events are just queued!
+            // They are not dispatched again when the events are persisted to the event stream!
+            $this->invokeListeners($events);
 
-            // Notify subscribers.
-            // Subscribers are notified AFTER the events listeners are processed.
-            // Subscribers are NOT notified of qeued events.
-            if (!$qeueEvents) {
+            // Send an AggregateUpdatedEvent after the events were persisted to the event stream!
+            // An AggregateUpdatedEvent is NOT send after storing queued events.
+            if (!$queueEvents) {
                 $this->sendAggregateUpdates($eventStreamObjects);
             }
         } catch (\Exception $e) {
@@ -132,18 +122,19 @@ class EventBus
     }
 
     /**
-     * Save qeued Events to the Event Stream.
+     * Save queued Events to the Event Stream.
      *
-     * @param EventQeueObject[] $eventQeueObjects
+     * @param EventQueueObject[] $eventQueueObjects
      *
      * @return bool
+     * @throws \Exception
      */
-    public function publishQeued(array $eventQeueObjects): bool
+    public function publishQueued(array $eventQueueObjects): bool
     {
-        $eventStreamObjects = array_map(static function ($eventQeueObject) {
-            /* @var EventQeueObject $eventQeueObject */
-            return $eventQeueObject->getEventStreamObject();
-        }, $eventQeueObjects);
+        $eventStreamObjects = array_map(static function ($eventQueueObject) {
+            /* @var EventQueueObject $eventQueueObject */
+            return $eventQueueObject->getEventStreamObject();
+        }, $eventQueueObjects);
 
         /**
          * Add EventStreamObjects to list of EventStreamObjects that should be persisted.
@@ -157,7 +148,7 @@ class EventBus
         try {
             $this->eventStore->save();
 
-            // Notify subscribers.
+            // Send an AggregateUpdatedEvent after the formerly queued events were persisted to the event stream!
             $this->sendAggregateUpdates($eventStreamObjects);
         } catch (\Exception $e) {
             // Saving to the Event Store failed. This can happen for example when an aggregate version is already taken.
@@ -173,12 +164,12 @@ class EventBus
         }
 
         /**
-         * Remove EventQeueObjects from qeue.
+         * Remove EventQueueObjects from queue.
          *
-         * @var EventQeueObject $eventQeueObject
+         * @var EventQueueObject $eventQueueObject
          */
-        foreach ($eventQeueObjects as $eventQeueObject) {
-            $this->eventStore->remove($eventQeueObject);
+        foreach ($eventQueueObjects as $eventQueueObject) {
+            $this->eventStore->remove($eventQueueObject);
         }
 
         try {
@@ -186,7 +177,7 @@ class EventBus
 
             return true;
         } catch (\Exception $e) {
-            // Removal from the Event Qeue failed.
+            // Removal from the Event Queue failed.
             $this->messageBus->dispatch(new Message(
                 $e->getMessage(),
                 $e->getCode(),
@@ -197,6 +188,14 @@ class EventBus
 
             return false;
         }
+    }
+
+    /**
+     * @deprecated Use publishQueued instead.
+     */
+    public function publishQeued(array $eventQueueObjects): bool
+    {
+        return $this->publishQueued($eventQueueObjects);
     }
 
     /**
@@ -218,7 +217,10 @@ class EventBus
         }
     }
 
-    private function invokeListeners(array $events, CommandBus $commandBus): void
+    /**
+     * @param EventInterface[] $events
+     */
+    private function invokeListeners(array $events): void
     {
         /**
          * Execute Listener if Event was recorded.
@@ -226,58 +228,9 @@ class EventBus
          * @var EventInterface $event
          */
         foreach ($events as $event) {
-            // Execute the regular Event Listener.
-            $eventListenerClass = $event::getListenerClass();
 
-            // Get the Listener.
-            try {
-                // Get it as a service.
-                $eventListener = $this->container->get($eventListenerClass);
-            } catch (ServiceNotFoundException $e) {
-                /**
-                 * Construct Listener instance.
-                 *
-                 * @var object $eventListener
-                 */
-                $eventListener = new $eventListenerClass();
-            }
-
-            try {
-                if ($eventListener instanceof ListenerInterface) {
-                    // Invoke the Event Listener.
-                    $eventListener($commandBus, $event);
-                } else {
-                    throw new InterfaceException($eventListenerClass.' must implement '.ListenerInterface::class);
-                }
-            } catch (InterfaceException $e) {
-                $this->messageBus->dispatch(new Message(
-                    $e->getMessage(),
-                    $e->getCode(),
-                    $event->getCommand()->getUuid(),
-                    $event->getCommand()->getAggregateUuid(),
-                    $e
-                ));
-            }
-
-            // Execute the Listener that was passed to the Command.
-            $callable = $event->getCommand()->getListener();
-            if (null !== $callable) {
-                try {
-                    if (\is_callable($callable)) {
-                        $callable($commandBus, $event);
-                    } else {
-                        throw new \Exception('Passed listener is not callable');
-                    }
-                } catch (\Exception $e) {
-                    $this->messageBus->dispatch(new Message(
-                        $e->getMessage(),
-                        $e->getCode(),
-                        $event->getCommand()->getUuid(),
-                        $event->getCommand()->getAggregateUuid(),
-                        $e
-                    ));
-                }
-            }
+            // Dispatch the event.
+            $this->eventDispatcher->dispatch($event);
         }
     }
 }

@@ -18,13 +18,6 @@ interface HandlerInterface
     public function __construct(MessageBus $messageBus, AggregateFactory $aggregateFactory);
 
     /**
-     * Returns the Command class associated with this Handler.
-     *
-     * @return string
-     */
-    public static function getCommandClass(): string;
-
-    /**
      * When the Handler is invokes it performs the following actions:
      * Get the Aggregate.
      * Check if the Command is valid.
@@ -68,20 +61,20 @@ interface HandlerInterface
     /**
      * A wrapper for the execute function.
      *
-     * @param CommandInterface   $command
+     * @param EventInterface     $event
      * @param AggregateInterface $aggregate
      *
      * @return AggregateInterface
      */
-    public function executeHandler(CommandInterface $command, AggregateInterface $aggregate): AggregateInterface;
+    public function executeHandler(EventInterface $event, AggregateInterface $aggregate): AggregateInterface;
 
     /**
      * Executes the business logic this Handler implements.
      *
-     * @param CommandInterface   $command
+     * @param EventInterface     $event
      * @param AggregateInterface $aggregate
      *
      * @return AggregateInterface
      */
-    public function execute(CommandInterface $command, AggregateInterface $aggregate): AggregateInterface;
+    public function execute(EventInterface $event, AggregateInterface $aggregate): AggregateInterface;
 }

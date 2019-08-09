@@ -33,13 +33,6 @@ abstract class Handler
     }
 
     /**
-     * Returns the Command class associated with this Handler.
-     *
-     * @return string
-     */
-    abstract public static function getCommandClass(): string;
-
-    /**
      * Returns a new Event instance of the Event class associated with this Handler.
      *
      * @param CommandInterface $command
@@ -61,25 +54,25 @@ abstract class Handler
     /**
      * Executes the business logic this Handler implements.
      *
-     * @param CommandInterface   $command
+     * @param EventInterface     $event
      * @param AggregateInterface $aggregate
      *
      * @return AggregateInterface
      */
-    abstract public function execute(CommandInterface $command, AggregateInterface $aggregate): AggregateInterface;
+    abstract public function execute(EventInterface $event, AggregateInterface $aggregate): AggregateInterface;
 
     /**
      * A wrapper for the execute function.
      *
-     * @param CommandInterface   $command
+     * @param EventInterface     $event
      * @param AggregateInterface $aggregate
      *
      * @return AggregateInterface
      */
-    public function executeHandler(CommandInterface $command, AggregateInterface $aggregate): AggregateInterface
+    public function executeHandler(EventInterface $event, AggregateInterface $aggregate): AggregateInterface
     {
         /* Execute method is implemented in final class */
-        return $this->execute($command, $aggregate);
+        return $this->execute($event, $aggregate);
     }
 
     /**
@@ -90,6 +83,8 @@ abstract class Handler
      * @param int    $user
      *
      * @return AggregateInterface
+     *
+     * @throws \Exception
      */
     public function getAggregate(string $uuid, string $aggregateClass, int $user): AggregateInterface
     {
@@ -104,10 +99,12 @@ abstract class Handler
      *
      * @param CommandInterface $command
      * @param array            $aggregates
+     *
+     * @throws \Exception
      */
     public function __invoke(CommandInterface $command, array &$aggregates): void
     {
-        $aggregateClass = $command->getAggregateClass();
+        $aggregateClass = $command::getAggregateClass();
         $aggregateUuid = $command->getAggregateUuid();
         $user = $command->getUser();
 
@@ -131,7 +128,11 @@ abstract class Handler
             ));
         } elseif ($validCommand) {
             try {
-                // Create Event for Command.
+                /**
+                 * Create Event for Command.
+                 *
+                 * @var EventInterface $event
+                 */
                 $event = $this->createEvent($command);
 
                 if ($event instanceof EventInterface) {

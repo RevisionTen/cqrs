@@ -20,7 +20,7 @@ class PageController extends Controller
         $aggregateUuid = Uuid::uuid1()->toString();
 
         $success = false;
-        $successCallback = function ($commandBus, $event) use (&$success) { $success = true; };
+        $successCallback = static function ($commandBus, $event) use (&$success) { $success = true; };
 
         $pageCreateCommand = new PageCreateCommand(1, null, $aggregateUuid, 0, [
             'title' => $title,

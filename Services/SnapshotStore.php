@@ -54,7 +54,11 @@ class SnapshotStore
         }
 
         $criteria->orderBy(['version' => Criteria::DESC]);
-        $snapshot = $this->em->getRepository(Snapshot::class)->matching($criteria)->first();
+
+        /** @var \Doctrine\ORM\EntityRepository $snapshotRepository */
+        $snapshotRepository = $this->em->getRepository(Snapshot::class);
+
+        $snapshot = $snapshotRepository->matching($criteria)->first();
 
         return $snapshot instanceof Snapshot ? $snapshot : null;
     }
@@ -62,7 +66,9 @@ class SnapshotStore
     /**
      * Saves a Snapshot.
      *
-     * @param AggregateInterface $aggregate
+     * @param \RevisionTen\CQRS\Interfaces\AggregateInterface $aggregate
+     *
+     * @throws \Exception
      */
     public function save(AggregateInterface $aggregate): void
     {

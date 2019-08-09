@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace RevisionTen\CQRS\Tests\Examples\Handler;
 
-use RevisionTen\CQRS\Handler\Handler;
-use RevisionTen\CQRS\Tests\Examples\Command\PageCreateCommand;
 use RevisionTen\CQRS\Tests\Examples\Event\PageCreateEvent;
 use RevisionTen\CQRS\Tests\Examples\Model\Page;
 use RevisionTen\CQRS\Interfaces\AggregateInterface;
@@ -13,6 +11,7 @@ use RevisionTen\CQRS\Interfaces\CommandInterface;
 use RevisionTen\CQRS\Interfaces\EventInterface;
 use RevisionTen\CQRS\Interfaces\HandlerInterface;
 use RevisionTen\CQRS\Message\Message;
+use RevisionTen\CQRS\Handler\Handler;
 
 final class PageCreateHandler extends Handler implements HandlerInterface
 {
@@ -21,9 +20,9 @@ final class PageCreateHandler extends Handler implements HandlerInterface
      *
      * @var Page $aggregate
      */
-    public function execute(CommandInterface $command, AggregateInterface $aggregate): AggregateInterface
+    public function execute(EventInterface $event, AggregateInterface $aggregate): AggregateInterface
     {
-        $payload = $command->getPayload();
+        $payload = $event->getPayload();
 
         $aggregate->title = $payload['title'];
 
@@ -33,17 +32,15 @@ final class PageCreateHandler extends Handler implements HandlerInterface
     /**
      * {@inheritdoc}
      */
-    public static function getCommandClass(): string
-    {
-        return PageCreateCommand::class;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function createEvent(CommandInterface $command): EventInterface
     {
-        return new PageCreateEvent($command);
+        return new PageCreateEvent(
+            $command->getAggregateUuid(),
+            $command->getUuid(),
+            $command->getOnVersion() + 1,
+            $command->getUser(),
+            $command->getPayload()
+        );
     }
 
     /**

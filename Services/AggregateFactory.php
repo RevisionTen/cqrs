@@ -6,7 +6,6 @@ namespace RevisionTen\CQRS\Services;
 
 use RevisionTen\CQRS\Exception\AggregateException;
 use RevisionTen\CQRS\Interfaces\AggregateInterface;
-use RevisionTen\CQRS\Interfaces\CommandInterface;
 use RevisionTen\CQRS\Interfaces\EventInterface;
 use RevisionTen\CQRS\Interfaces\HandlerInterface;
 use RevisionTen\CQRS\Message\Message;
@@ -45,6 +44,12 @@ class AggregateFactory
         $this->snapshotStore = $snapshotStore;
     }
 
+    /**
+     * @param string|null $aggregateClass
+     *
+     * @return array
+     * @throws \Exception
+     */
     public function findAggregates(string $aggregateClass = null): array
     {
         $aggregates = [];
@@ -72,6 +77,8 @@ class AggregateFactory
      * @param int|null $user
      *
      * @return AggregateInterface
+     *
+     * @throws \Exception
      */
     public function build(string $uuid, string $aggregateClass, int $max_version = null, int $user = null): AggregateInterface
     {
@@ -108,11 +115,11 @@ class AggregateFactory
 
                 if (null !== $user) {
                     /**
-                     * Get qeued Event Stream Objects.
+                     * Get queued Event Stream Objects.
                      *
                      * @var EventStreamObject[] $eventStreamObjects
                      */
-                    $eventStreamObjects = $this->eventStore->findQeued($uuid, $max_version, $aggregate->getVersion() + 1, $user);
+                    $eventStreamObjects = $this->eventStore->findQueued($uuid, $user, $max_version, $aggregate->getVersion() + 1);
                     if ($eventStreamObjects) {
                         $aggregate = $this->loadFromHistory($aggregate, $eventStreamObjects);
                     }
@@ -226,7 +233,6 @@ class AggregateFactory
             if ('created' === $property || 'modified' === $property) {
                 continue;
             }
-            // Todo: Convert json date to php DateTime.
 
             if (isset($snapshotData[$property])) {
                 $aggregate->{$property} = $snapshotData[$property];
@@ -257,9 +263,9 @@ class AggregateFactory
              *
              * @var HandlerInterface $handler
              */
-            $handlerClass = $event->getCommand()->getHandlerClass();
+            $handlerClass = $event::getHandlerClass();
             $handler = new $handlerClass($this->messageBus, $this);
-            $aggregate = $handler->executeHandler($event->getCommand(), $aggregate);
+            $aggregate = $handler->executeHandler($event, $aggregate);
         }
 
         // Clear pending events.
@@ -282,7 +288,7 @@ class AggregateFactory
     public function apply(AggregateInterface $aggregate, EventInterface $event): AggregateInterface
     {
         // Increase version on each apply call.
-        $aggregate->setVersion($event->getCommand()->getOnVersion() + 1);
+        $aggregate->setVersion($event->getVersion());
 
         // Add Event to pending Events.
         return $aggregate->addPendingEvent($event);
