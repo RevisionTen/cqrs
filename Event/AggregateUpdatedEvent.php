@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace RevisionTen\CQRS\Event;
 
 use RevisionTen\CQRS\Interfaces\EventInterface;
+use Symfony\Contracts\EventDispatcher\Event;
 
-class AggregateUpdatedEvent extends \Symfony\Contracts\EventDispatcher\Event
+class AggregateUpdatedEvent extends Event
 {
     public const NAME = 'aggregate.updated';
 

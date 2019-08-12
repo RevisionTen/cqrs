@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace RevisionTen\CQRS\Interfaces;
 
+use DateTimeImmutable;
+
 interface AggregateInterface
 {
     /**
@@ -66,26 +68,26 @@ interface AggregateInterface
     /**
      * @return \DateTimeImmutable
      */
-    public function getCreated(): ?\DateTimeImmutable;
+    public function getCreated(): ?DateTimeImmutable;
 
     /**
      * @param \DateTimeImmutable $created
      *
      * @return AggregateInterface
      */
-    public function setCreated(\DateTimeImmutable $created): self;
+    public function setCreated(DateTimeImmutable $created): self;
 
     /**
      * @return \DateTimeImmutable
      */
-    public function getModified(): ?\DateTimeImmutable;
+    public function getModified(): ?DateTimeImmutable;
 
     /**
      * @param \DateTimeImmutable $modified
      *
      * @return AggregateInterface
      */
-    public function setModified(\DateTimeImmutable $modified): self;
+    public function setModified(DateTimeImmutable $modified): self;
 
     /**
      * Returns an array of pending Events.

@@ -12,6 +12,7 @@ use RevisionTen\CQRS\Model\EventQueueObject;
 use RevisionTen\CQRS\Model\EventStreamObject;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\LegacyEventDispatcherProxy;
+use function array_map;
 use function get_class;
 
 class EventBus
@@ -48,13 +49,12 @@ class EventBus
     /**
      * Dispatch all events to observing event handlers and save them to the Event Store.
      *
-     * @param array                                 $events
-     * @param \RevisionTen\CQRS\Services\CommandBus $commandBus
-     * @param bool                                  $queueEvents
+     * @param array $events
+     * @param bool  $queueEvents
      *
      * @throws \Exception
      */
-    public function publish(array $events, CommandBus $commandBus, bool $queueEvents = false): void
+    public function publish(array $events, bool $queueEvents = false): void
     {
         $eventStreamObjects = [];
         /**
@@ -190,14 +190,6 @@ class EventBus
 
             return false;
         }
-    }
-
-    /**
-     * @deprecated Use publishQueued instead.
-     */
-    public function publishQeued(array $eventQueueObjects): bool
-    {
-        return $this->publishQueued($eventQueueObjects);
     }
 
     /**

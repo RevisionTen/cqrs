@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace RevisionTen\CQRS\Services;
 
+use Exception;
 use RevisionTen\CQRS\Interfaces\AggregateInterface;
 use RevisionTen\CQRS\Message\Message;
 use RevisionTen\CQRS\Model\Snapshot;
 use Doctrine\Common\Collections\Criteria;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\OptimisticLockException;
 use function get_class;
+use function json_decode;
+use function json_encode;
 
 class SnapshotStore
 {
@@ -68,8 +69,6 @@ class SnapshotStore
      * Saves a Snapshot.
      *
      * @param \RevisionTen\CQRS\Interfaces\AggregateInterface $aggregate
-     *
-     * @throws \Exception
      */
     public function save(AggregateInterface $aggregate): void
     {
@@ -86,15 +85,7 @@ class SnapshotStore
         try {
             $this->em->persist($snapshot);
             $this->em->flush();
-        } catch (OptimisticLockException $e) {
-            $this->messageBus->dispatch(new Message(
-                $e->getMessage(),
-                $e->getCode(),
-                null,
-                $aggregate->getUuid(),
-                $e
-            ));
-        } catch (UniqueConstraintViolationException $e) {
+        } catch (Exception $e) {
             $this->messageBus->dispatch(new Message(
                 $e->getMessage(),
                 $e->getCode(),

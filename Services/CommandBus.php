@@ -14,7 +14,9 @@ use RevisionTen\CQRS\Interfaces\HandlerInterface;
 use RevisionTen\CQRS\Message\Message;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
+use function class_implements;
 use function get_class;
+use function in_array;
 
 class CommandBus
 {
@@ -219,7 +221,7 @@ class CommandBus
                         $events += $pendingEvents;
                     }
 
-                    $this->eventBus->publish($events, $this, $queueEvents);
+                    $this->eventBus->publish($events, $queueEvents);
                 } else {
                     throw new InterfaceException(get_class($handler).' must implement '.HandlerInterface::class);
                 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace RevisionTen\CQRS\Model;
 
+use DateTimeImmutable;
 use RevisionTen\CQRS\Interfaces\AggregateInterface;
 use RevisionTen\CQRS\Interfaces\EventInterface;
 
@@ -142,7 +143,7 @@ class Aggregate implements AggregateInterface
     /**
      * @return \DateTimeImmutable
      */
-    public function getCreated(): ?\DateTimeImmutable
+    public function getCreated(): ?DateTimeImmutable
     {
         return $this->created;
     }
@@ -152,7 +153,7 @@ class Aggregate implements AggregateInterface
      *
      * @return AggregateInterface
      */
-    public function setCreated(\DateTimeImmutable $created): AggregateInterface
+    public function setCreated(DateTimeImmutable $created): AggregateInterface
     {
         $this->created = $created;
 
@@ -162,7 +163,7 @@ class Aggregate implements AggregateInterface
     /**
      * @return \DateTimeImmutable
      */
-    public function getModified(): ?\DateTimeImmutable
+    public function getModified(): ?DateTimeImmutable
     {
         return $this->modified;
     }
@@ -172,7 +173,7 @@ class Aggregate implements AggregateInterface
      *
      * @return AggregateInterface
      */
-    public function setModified(\DateTimeImmutable $modified): AggregateInterface
+    public function setModified(DateTimeImmutable $modified): AggregateInterface
     {
         $this->modified = $modified;
 

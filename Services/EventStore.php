@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace RevisionTen\CQRS\Services;
 
+use Exception;
 use RevisionTen\CQRS\Interfaces\EventInterface;
 use RevisionTen\CQRS\Message\Message;
 use RevisionTen\CQRS\Model\EventQueueObject;
 use RevisionTen\CQRS\Model\EventStreamObject;
 use Doctrine\Common\Collections\Criteria;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\OptimisticLockException;
+use function array_map;
 use function is_array;
 
 class EventStore
@@ -107,14 +107,6 @@ class EventStore
     }
 
     /**
-     * @deprecated Use findQueued instead.
-     */
-    public function findQeued(string $uuid, int $max_version = null, int $min_version = null, int $user): array
-    {
-        return $this->findQueued($uuid, $user, $max_version, $min_version);
-    }
-
-    /**
      * Returns Event Objects for a given Uuid.
      *
      * @param string   $objectClass
@@ -176,14 +168,6 @@ class EventStore
     }
 
     /**
-     * @deprecated Use queue instead.
-     */
-    public function qeue(EventQueueObject $eventQueueObject): void
-    {
-        $this->queue($eventQueueObject);
-    }
-
-    /**
      * Removes an Event from the Event Queue.
      * Events are not removed until save() is called.
      *
@@ -210,14 +194,6 @@ class EventStore
     }
 
     /**
-     * @deprecated Use discardQueued instead.
-     */
-    public function discardQeued(string $uuid, int $user): void
-    {
-        $this->discardQueued($uuid, $user);
-    }
-
-    /**
      * Discards the latest queued Event for a specific Aggregate and User.
      *
      * @param string $uuid
@@ -234,29 +210,13 @@ class EventStore
     }
 
     /**
-     * @deprecated Use discardLatestQueued instead.
-     */
-    public function discardLatestQeued(string $uuid, int $user, int $version): void
-    {
-        $this->discardLatestQueued($uuid, $user, $version);
-    }
-
-    /**
      * Saves the events to the Event Store.
      */
     public function save(): void
     {
         try {
             $this->em->flush();
-        } catch (OptimisticLockException $e) {
-            $this->messageBus->dispatch(new Message(
-                $e->getMessage(),
-                $e->getCode(),
-                null,
-                null,
-                $e
-            ));
-        } catch (UniqueConstraintViolationException $e) {
+        } catch (Exception $e) {
             $this->messageBus->dispatch(new Message(
                 $e->getMessage(),
                 $e->getCode(),

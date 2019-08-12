@@ -15,6 +15,7 @@ use RevisionTen\CQRS\Model\Snapshot;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use function count;
+use function get_object_vars;
 
 class AggregateFactory
 {
