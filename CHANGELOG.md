@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [UNRELEASED 2.0.0] - 2019-08-08
 ### Changed
 - Use symfony events
+- Changed command, event and handler classes and interfaces
+- Removed MessageBus from Handlers, throw CommandValidationException instead
+- Handlers can now be services (they must be public)
+### Removed
+- Removed abstract Handler class
 
 ## [1.1.3] - 2019-08-06
 ### Changed

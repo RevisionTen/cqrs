@@ -12,6 +12,8 @@ use RevisionTen\CQRS\Message\Message;
 use RevisionTen\CQRS\Model\Aggregate;
 use RevisionTen\CQRS\Model\EventStreamObject;
 use RevisionTen\CQRS\Model\Snapshot;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
 class AggregateFactory
 {
@@ -31,17 +33,24 @@ class AggregateFactory
     private $snapshotStore;
 
     /**
+     * @var ContainerInterface
+     */
+    private $container;
+
+    /**
      * AggregateFactory constructor.
      *
-     * @param MessageBus    $messageBus
-     * @param EventStore    $eventStore
-     * @param SnapshotStore $snapshotStore
+     * @param \RevisionTen\CQRS\Services\MessageBus                     $messageBus
+     * @param \RevisionTen\CQRS\Services\EventStore                     $eventStore
+     * @param \RevisionTen\CQRS\Services\SnapshotStore                  $snapshotStore
+     * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
      */
-    public function __construct(MessageBus $messageBus, EventStore $eventStore, SnapshotStore $snapshotStore)
+    public function __construct(MessageBus $messageBus, EventStore $eventStore, SnapshotStore $snapshotStore, ContainerInterface $container)
     {
         $this->messageBus = $messageBus;
         $this->eventStore = $eventStore;
         $this->snapshotStore = $snapshotStore;
+        $this->container = $container;
     }
 
     /**
@@ -264,7 +273,14 @@ class AggregateFactory
              * @var HandlerInterface $handler
              */
             $handlerClass = $event::getHandlerClass();
-            $handler = new $handlerClass($this->messageBus, $this);
+
+            // Try to get the handler as a service or instantiate it.
+            try {
+                $handler = $this->container->get($handlerClass);
+            } catch (ServiceNotFoundException $e) {
+                $handler = new $handlerClass();
+            }
+
             $aggregate = $handler->execute($event, $aggregate);
         }
 
