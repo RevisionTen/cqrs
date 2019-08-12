@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace RevisionTen\CQRS\Services;
 
+use Exception;
 use RevisionTen\CQRS\Event\AggregateUpdatedEvent;
 use RevisionTen\CQRS\Interfaces\EventInterface;
 use RevisionTen\CQRS\Message\Message;
@@ -11,6 +12,7 @@ use RevisionTen\CQRS\Model\EventQueueObject;
 use RevisionTen\CQRS\Model\EventStreamObject;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\LegacyEventDispatcherProxy;
+use function get_class;
 
 class EventBus
 {
@@ -62,7 +64,7 @@ class EventBus
             // Save the event to the event stream.
             $eventStreamObject = new EventStreamObject();
 
-            $eventStreamObject->setEvent(\get_class($event));
+            $eventStreamObject->setEvent(get_class($event));
 
             $eventStreamObject->setAggregateClass($event::getAggregateClass());
             $eventStreamObject->setMessage($event->getMessage());
@@ -109,7 +111,7 @@ class EventBus
             if (!$queueEvents) {
                 $this->sendAggregateUpdates($eventStreamObjects);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Saving to the Event Store failed. This can happen for example when an aggregate version is already taken.
             $this->messageBus->dispatch(new Message(
                 $e->getMessage(),
@@ -150,7 +152,7 @@ class EventBus
 
             // Send an AggregateUpdatedEvent after the formerly queued events were persisted to the event stream!
             $this->sendAggregateUpdates($eventStreamObjects);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Saving to the Event Store failed. This can happen for example when an aggregate version is already taken.
             $this->messageBus->dispatch(new Message(
                 $e->getMessage(),
@@ -176,7 +178,7 @@ class EventBus
             $this->eventStore->save();
 
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Removal from the Event Queue failed.
             $this->messageBus->dispatch(new Message(
                 $e->getMessage(),

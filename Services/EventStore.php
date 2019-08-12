@@ -12,6 +12,7 @@ use Doctrine\Common\Collections\Criteria;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\OptimisticLockException;
+use function is_array;
 
 class EventStore
 {
@@ -68,7 +69,7 @@ class EventStore
 
         $eventStreamObjects = $this->em->getRepository(EventStreamObject::class)->findBy($criteria);
 
-        return \is_array($eventStreamObjects) ? $eventStreamObjects : [];
+        return is_array($eventStreamObjects) ? $eventStreamObjects : [];
     }
 
     /**

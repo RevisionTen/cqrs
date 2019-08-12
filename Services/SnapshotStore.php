@@ -11,6 +11,7 @@ use Doctrine\Common\Collections\Criteria;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\OptimisticLockException;
+use function get_class;
 
 class SnapshotStore
 {
@@ -77,7 +78,7 @@ class SnapshotStore
         $snapshot->setVersion($aggregate->getVersion());
         $snapshot->setAggregateCreated($aggregate->getCreated());
         $snapshot->setAggregateModified($aggregate->getModified());
-        $snapshot->setAggregateClass(\get_class($aggregate));
+        $snapshot->setAggregateClass(get_class($aggregate));
         $snapshot->setHistory($aggregate->getHistory());
         $aggregateData = json_decode(json_encode($aggregate), true);
         $snapshot->setPayload($aggregateData);

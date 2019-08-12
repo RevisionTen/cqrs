@@ -6,6 +6,7 @@ namespace RevisionTen\CQRS\Services;
 
 use RevisionTen\CQRS\Message\Message;
 use Psr\Log\LoggerInterface;
+use function is_string;
 
 class MessageBus
 {
@@ -65,7 +66,7 @@ class MessageBus
     public function getMessagesJson(): array
     {
         $messages = [];
-        $debug = \is_string($this->env) && 'dev' === $this->env ?: $this->env->isDebug();
+        $debug = is_string($this->env) && 'dev' === $this->env ?: $this->env->isDebug();
 
         foreach ($this->messages as $message) {
             if ($debug && $message->exception) {

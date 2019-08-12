@@ -14,6 +14,7 @@ use RevisionTen\CQRS\Model\EventStreamObject;
 use RevisionTen\CQRS\Model\Snapshot;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
+use function count;
 
 class AggregateFactory
 {
@@ -173,7 +174,7 @@ class AggregateFactory
     public function loadFromHistory(AggregateInterface $aggregate, array $eventStreamObjects): AggregateInterface
     {
         // Arrays start at zero ;)
-        $count = \count($eventStreamObjects) - 1;
+        $count = count($eventStreamObjects) - 1;
 
         /**
          * Get events and replay them.
