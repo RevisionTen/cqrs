@@ -88,8 +88,6 @@ class AggregateFactory
      * @param int|null $user
      *
      * @return AggregateInterface
-     *
-     * @throws \Exception
      */
     public function build(string $uuid, string $aggregateClass, int $max_version = null, int $user = null): AggregateInterface
     {
@@ -151,17 +149,6 @@ class AggregateFactory
         }
 
         return $aggregate;
-    }
-
-    /**
-     * Optimizes an Aggregate by taking a Snapshot.
-     *
-     * @param AggregateInterface $aggregate
-     */
-    public function optimize(AggregateInterface $aggregate): void
-    {
-        //if ($aggregate->shouldTakeSnapshot()) {
-        //}
     }
 
     /**

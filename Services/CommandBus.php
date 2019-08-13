@@ -71,7 +71,9 @@ class CommandBus
      * @param bool|null  $queueEvents
      *
      * @return bool Returns true if the command was accepted.
+     *
      * @throws \RevisionTen\CQRS\Exception\InterfaceException
+     * @throws \Exception
      */
     public function execute(string $commandClass, string $aggregateUuid, ?array $payload = [], ?int $user = -1, ?bool $queueEvents = false): bool
     {
@@ -80,11 +82,11 @@ class CommandBus
         }
 
         /** @var CommandInterface $commandClass */
-        $agregate = $this->aggregateFactory->build($aggregateUuid, $commandClass::getAggregateClass());
-        $agregateVersion = $agregate->getVersion();
+        $aggregate = $this->aggregateFactory->build($aggregateUuid, $commandClass::getAggregateClass());
+        $aggregateVersion = $aggregate->getVersion();
 
         $commandUuid = Uuid::uuid1()->toString();
-        $command = new $commandClass($user, $commandUuid, $aggregateUuid, $agregateVersion, $payload);
+        $command = new $commandClass($user, $commandUuid, $aggregateUuid, $aggregateVersion, $payload);
 
         return $this->dispatch($command, $queueEvents);
     }
@@ -218,7 +220,7 @@ class CommandBus
                         /** @var array $pendingEvents */
                         $pendingEvents = $aggregate->getPendingEvents();
 
-                        $events += $pendingEvents;
+                        array_push($events, ...$pendingEvents);
                     }
 
                     $this->eventBus->publish($events, $queueEvents);
