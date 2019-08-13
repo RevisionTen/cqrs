@@ -10,10 +10,8 @@ use RevisionTen\CQRS\Interfaces\AggregateInterface;
 use RevisionTen\CQRS\Interfaces\CommandInterface;
 use RevisionTen\CQRS\Interfaces\EventInterface;
 use RevisionTen\CQRS\Interfaces\HandlerInterface;
-use RevisionTen\CQRS\Message\Message;
-use RevisionTen\CQRS\Handler\Handler;
 
-final class <?= $commandName; ?>Handler extends Handler implements HandlerInterface
+final class <?= $commandName; ?>Handler implements HandlerInterface
 {
     /**
      * {@inheritdoc}
