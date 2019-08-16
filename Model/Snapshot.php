@@ -55,29 +55,23 @@ class Snapshot
     private $payload;
 
     /**
-     * TODO: Change to datetime_immutable once https://github.com/doctrine/doctrine2/pull/6988 is fixed.
-     *
      * @var \DateTimeImmutable
      *
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime_immutable")
      */
     private $aggregateCreated;
 
     /**
-     * TODO: Change to datetime_immutable once https://github.com/doctrine/doctrine2/pull/6988 is fixed.
-     *
      * @var \DateTimeImmutable
      *
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime_immutable")
      */
     private $aggregateModified;
 
     /**
-     * TODO: Change to datetime_immutable once https://github.com/doctrine/doctrine2/pull/6988 is fixed.
-     *
      * @var \DateTimeImmutable
      *
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime_immutable")
      */
     private $created;
 
@@ -186,8 +180,7 @@ class Snapshot
      */
     public function getCreated(): DateTimeImmutable
     {
-        // TODO: remove createFromMutable once https://github.com/doctrine/doctrine2/pull/6988 is fixed.
-        return ($this->created instanceof DateTimeImmutable) ? $this->created : DateTimeImmutable::createFromMutable($this->created);
+        return $this->created;
     }
 
     /**
@@ -207,8 +200,7 @@ class Snapshot
      */
     public function getAggregateCreated(): DateTimeImmutable
     {
-        // TODO: remove createFromMutable once https://github.com/doctrine/doctrine2/pull/6988 is fixed.
-        return ($this->aggregateCreated instanceof DateTimeImmutable) ? $this->aggregateCreated : DateTimeImmutable::createFromMutable($this->aggregateCreated);
+        return $this->aggregateCreated;
     }
 
     /**
@@ -228,8 +220,7 @@ class Snapshot
      */
     public function getAggregateModified(): DateTimeImmutable
     {
-        // TODO: remove createFromMutable once https://github.com/doctrine/doctrine2/pull/6988 is fixed.
-        return ($this->aggregateModified instanceof DateTimeImmutable) ? $this->aggregateModified : DateTimeImmutable::createFromMutable($this->aggregateModified);
+        return $this->aggregateModified;
     }
 
     /**

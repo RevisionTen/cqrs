@@ -10,11 +10,21 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class CqrsExtension extends Extension implements PrependExtensionInterface
 {
-    public function load(array $configs, ContainerBuilder $container)
+
+    /**
+     * @param array                                                   $configs
+     * @param \Symfony\Component\DependencyInjection\ContainerBuilder $container
+     */
+    public function load(array $configs, ContainerBuilder $container): void
     {
     }
 
-    public function prepend(ContainerBuilder $container)
+    /**
+     * @param \Symfony\Component\DependencyInjection\ContainerBuilder $container
+     *
+     * @throws \Exception
+     */
+    public function prepend(ContainerBuilder $container): void
     {
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('config.yaml');

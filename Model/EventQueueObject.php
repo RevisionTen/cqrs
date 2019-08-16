@@ -48,11 +48,9 @@ class EventQueueObject
     private $version;
 
     /**
-     * TODO: Change to datetime_immutable once https://github.com/doctrine/doctrine2/pull/6988 is fixed.
-     *
      * @var \DateTimeImmutable
      *
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime_immutable")
      */
     private $created;
 
@@ -200,8 +198,7 @@ class EventQueueObject
      */
     public function getCreated(): DateTimeImmutable
     {
-        // TODO: remove createFromMutable once https://github.com/doctrine/doctrine2/pull/6988 is fixed.
-        return ($this->created instanceof DateTimeImmutable) ? $this->created : DateTimeImmutable::createFromMutable($this->created);
+        return $this->created;
     }
 
     /**

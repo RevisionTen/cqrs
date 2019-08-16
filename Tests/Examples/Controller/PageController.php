@@ -32,6 +32,8 @@ class PageController extends AbstractController
 
         $aggregate = $aggregateFactory->build($aggregateUuid, Page::class);
 
-        return new JsonResponse($aggregate ?? 'fail', 200);
+        return new JsonResponse([
+            'aggregate' => $aggregate,
+        ], 200);
     }
 }

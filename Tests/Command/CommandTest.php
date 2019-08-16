@@ -34,7 +34,7 @@ class CommandTest extends WebTestCase
 
     public function testCreatePage()
     {
-        $crawler = $this->client->request('GET', '/create-page/TestTitle');
+        $this->client->request('GET', '/create-page/TestTitle');
         $response = $this->client->getResponse();
         $content = $response->getContent();
 

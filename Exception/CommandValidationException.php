@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace RevisionTen\CQRS\Exception;
 
+use Exception;
 use RevisionTen\CQRS\Interfaces\CommandInterface;
 use Throwable;
 
-class CommandValidationException extends \Exception implements ExceptionInterface
+class CommandValidationException extends Exception implements ExceptionInterface
 {
     public $command;
 
