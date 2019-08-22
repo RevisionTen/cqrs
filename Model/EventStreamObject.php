@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace RevisionTen\CQRS\Model;
 
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use function is_string;
+use function json_decode;
+use function json_encode;
 
 /**
  * Class EventStreamObject.
@@ -44,11 +48,9 @@ class EventStreamObject
     private $version;
 
     /**
-     * TODO: Change to datetime_immutable once https://github.com/doctrine/doctrine2/pull/6988 is fixed.
-     *
      * @var \DateTimeImmutable
      *
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime_immutable")
      */
     private $created;
 
@@ -85,7 +87,7 @@ class EventStreamObject
 
     public function __construct()
     {
-        $this->created = new \DateTimeImmutable();
+        $this->created = new DateTimeImmutable();
     }
 
     /**
@@ -159,10 +161,9 @@ class EventStreamObject
     /**
      * @return \DateTimeImmutable
      */
-    public function getCreated(): \DateTimeImmutable
+    public function getCreated(): DateTimeImmutable
     {
-        // TODO: remove createFromMutable once https://github.com/doctrine/doctrine2/pull/6988 is fixed.
-        return ($this->created instanceof \DateTimeImmutable) ? $this->created : \DateTimeImmutable::createFromMutable($this->created);
+        return $this->created;
     }
 
     /**
@@ -242,7 +243,7 @@ class EventStreamObject
      */
     public function getPayload(): array
     {
-        return \is_string($this->payload) ? json_decode($this->payload, true) : $this->payload;
+        return is_string($this->payload) ? json_decode($this->payload, true) : $this->payload;
     }
 
     /**

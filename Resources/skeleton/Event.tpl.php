@@ -4,27 +4,27 @@ declare(strict_types=1);
 
 namespace <?= $bundleNamespace; ?>\Event;
 
-use <?= $bundleNamespace; ?>\Command\<?= $commandName; ?>Command;
-use <?= $bundleNamespace; ?>\Listener\<?= $commandName; ?>Listener;
-use RevisionTen\CQRS\Event\Event;
+use <?= $aggregateNamespace; ?>\<?= $aggregateClass; ?>;
+use <?= $bundleNamespace; ?>\Handler\<?= $commandName; ?>Handler;
+use RevisionTen\CQRS\Event\AggregateEvent;
 use RevisionTen\CQRS\Interfaces\EventInterface;
 
-final class <?= $commandName; ?>Event extends Event implements EventInterface
+final class <?= $commandName; ?>Event extends AggregateEvent implements EventInterface
 {
     /**
      * {@inheritdoc}
      */
-    public static function getCommandClass(): string
+    public static function getAggregateClass(): string
     {
-        return <?= $commandName; ?>Command::class;
+        return <?= $aggregateClass; ?>::class;
     }
 
     /**
      * {@inheritdoc}
      */
-    public static function getListenerClass(): string
+    public static function getHandlerClass(): string
     {
-        return <?= $commandName; ?>Listener::class;
+        return <?= $commandName; ?>Handler::class;
     }
 
     /**
@@ -33,13 +33,5 @@ final class <?= $commandName; ?>Event extends Event implements EventInterface
     public function getMessage(): string
     {
         return '<?= $eventText; ?>';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function getCode(): int
-    {
-        return CODE_OK;
     }
 }

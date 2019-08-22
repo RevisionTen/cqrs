@@ -71,16 +71,6 @@ class CommandMaker extends AbstractMaker
                     'eventText' => $eventText,
                 ]
             );
-            $generator->generateClass($bundleNamespace.'\\Listener\\'.$commandName.'Listener',
-                __DIR__.'/../Resources/skeleton/Listener.tpl.php',
-                [
-                    'commandName' => $commandName,
-                    'bundleNamespace' => $bundleNamespace,
-                    'aggregateClass' => $aggregateClass,
-                    'aggregateNamespace' => $aggregateNamespace,
-                    'eventText' => $eventText,
-                ]
-            );
 
             $generator->writeChanges();
             $this->writeSuccessMessage($io);

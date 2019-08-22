@@ -6,13 +6,16 @@ namespace RevisionTen\CQRS\Services;
 
 use RevisionTen\CQRS\Exception\AggregateException;
 use RevisionTen\CQRS\Interfaces\AggregateInterface;
-use RevisionTen\CQRS\Interfaces\CommandInterface;
 use RevisionTen\CQRS\Interfaces\EventInterface;
 use RevisionTen\CQRS\Interfaces\HandlerInterface;
 use RevisionTen\CQRS\Message\Message;
 use RevisionTen\CQRS\Model\Aggregate;
 use RevisionTen\CQRS\Model\EventStreamObject;
 use RevisionTen\CQRS\Model\Snapshot;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
+use function count;
+use function get_object_vars;
 
 class AggregateFactory
 {
@@ -32,19 +35,32 @@ class AggregateFactory
     private $snapshotStore;
 
     /**
+     * @var ContainerInterface
+     */
+    private $container;
+
+    /**
      * AggregateFactory constructor.
      *
-     * @param MessageBus    $messageBus
-     * @param EventStore    $eventStore
-     * @param SnapshotStore $snapshotStore
+     * @param \RevisionTen\CQRS\Services\MessageBus                     $messageBus
+     * @param \RevisionTen\CQRS\Services\EventStore                     $eventStore
+     * @param \RevisionTen\CQRS\Services\SnapshotStore                  $snapshotStore
+     * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
      */
-    public function __construct(MessageBus $messageBus, EventStore $eventStore, SnapshotStore $snapshotStore)
+    public function __construct(MessageBus $messageBus, EventStore $eventStore, SnapshotStore $snapshotStore, ContainerInterface $container)
     {
         $this->messageBus = $messageBus;
         $this->eventStore = $eventStore;
         $this->snapshotStore = $snapshotStore;
+        $this->container = $container;
     }
 
+    /**
+     * @param string|null $aggregateClass
+     *
+     * @return array
+     * @throws \Exception
+     */
     public function findAggregates(string $aggregateClass = null): array
     {
         $aggregates = [];
@@ -108,11 +124,11 @@ class AggregateFactory
 
                 if (null !== $user) {
                     /**
-                     * Get qeued Event Stream Objects.
+                     * Get queued Event Stream Objects.
                      *
                      * @var EventStreamObject[] $eventStreamObjects
                      */
-                    $eventStreamObjects = $this->eventStore->findQeued($uuid, $max_version, $aggregate->getVersion() + 1, $user);
+                    $eventStreamObjects = $this->eventStore->findQueued($uuid, $user, $max_version, $aggregate->getVersion() + 1);
                     if ($eventStreamObjects) {
                         $aggregate = $this->loadFromHistory($aggregate, $eventStreamObjects);
                     }
@@ -136,17 +152,6 @@ class AggregateFactory
     }
 
     /**
-     * Optimizes an Aggregate by taking a Snapshot.
-     *
-     * @param AggregateInterface $aggregate
-     */
-    public function optimize(AggregateInterface $aggregate): void
-    {
-        //if ($aggregate->shouldTakeSnapshot()) {
-        //}
-    }
-
-    /**
      * Load an Aggregate from provided Event Stream Objects.
      *
      * @param AggregateInterface $aggregate
@@ -157,7 +162,7 @@ class AggregateFactory
     public function loadFromHistory(AggregateInterface $aggregate, array $eventStreamObjects): AggregateInterface
     {
         // Arrays start at zero ;)
-        $count = \count($eventStreamObjects) - 1;
+        $count = count($eventStreamObjects) - 1;
 
         /**
          * Get events and replay them.
@@ -226,7 +231,6 @@ class AggregateFactory
             if ('created' === $property || 'modified' === $property) {
                 continue;
             }
-            // Todo: Convert json date to php DateTime.
 
             if (isset($snapshotData[$property])) {
                 $aggregate->{$property} = $snapshotData[$property];
@@ -257,9 +261,16 @@ class AggregateFactory
              *
              * @var HandlerInterface $handler
              */
-            $handlerClass = $event->getCommand()->getHandlerClass();
-            $handler = new $handlerClass($this->messageBus, $this);
-            $aggregate = $handler->executeHandler($event->getCommand(), $aggregate);
+            $handlerClass = $event::getHandlerClass();
+
+            // Try to get the handler as a service or instantiate it.
+            try {
+                $handler = $this->container->get($handlerClass);
+            } catch (ServiceNotFoundException $e) {
+                $handler = new $handlerClass();
+            }
+
+            $aggregate = $handler->execute($event, $aggregate);
         }
 
         // Clear pending events.
@@ -282,7 +293,7 @@ class AggregateFactory
     public function apply(AggregateInterface $aggregate, EventInterface $event): AggregateInterface
     {
         // Increase version on each apply call.
-        $aggregate->setVersion($event->getCommand()->getOnVersion() + 1);
+        $aggregate->setVersion($event->getVersion());
 
         // Add Event to pending Events.
         return $aggregate->addPendingEvent($event);
