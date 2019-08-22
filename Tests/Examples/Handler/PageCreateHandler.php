@@ -4,26 +4,24 @@ declare(strict_types=1);
 
 namespace RevisionTen\CQRS\Tests\Examples\Handler;
 
-use RevisionTen\CQRS\Handler\Handler;
-use RevisionTen\CQRS\Tests\Examples\Command\PageCreateCommand;
+use RevisionTen\CQRS\Exception\CommandValidationException;
 use RevisionTen\CQRS\Tests\Examples\Event\PageCreateEvent;
 use RevisionTen\CQRS\Tests\Examples\Model\Page;
 use RevisionTen\CQRS\Interfaces\AggregateInterface;
 use RevisionTen\CQRS\Interfaces\CommandInterface;
 use RevisionTen\CQRS\Interfaces\EventInterface;
 use RevisionTen\CQRS\Interfaces\HandlerInterface;
-use RevisionTen\CQRS\Message\Message;
 
-final class PageCreateHandler extends Handler implements HandlerInterface
+final class PageCreateHandler implements HandlerInterface
 {
     /**
      * {@inheritdoc}
      *
      * @var Page $aggregate
      */
-    public function execute(CommandInterface $command, AggregateInterface $aggregate): AggregateInterface
+    public function execute(EventInterface $event, AggregateInterface $aggregate): AggregateInterface
     {
-        $payload = $command->getPayload();
+        $payload = $event->getPayload();
 
         $aggregate->title = $payload['title'];
 
@@ -33,17 +31,15 @@ final class PageCreateHandler extends Handler implements HandlerInterface
     /**
      * {@inheritdoc}
      */
-    public static function getCommandClass(): string
-    {
-        return PageCreateCommand::class;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function createEvent(CommandInterface $command): EventInterface
     {
-        return new PageCreateEvent($command);
+        return new PageCreateEvent(
+            $command->getAggregateUuid(),
+            $command->getUuid(),
+            $command->getOnVersion() + 1,
+            $command->getUser(),
+            $command->getPayload()
+        );
     }
 
     /**
@@ -54,25 +50,21 @@ final class PageCreateHandler extends Handler implements HandlerInterface
         $payload = $command->getPayload();
 
         if (empty($payload['title'])) {
-            $this->messageBus->dispatch(new Message(
+            throw new CommandValidationException(
                 'You must enter a title',
                 CODE_BAD_REQUEST,
-                $command->getUuid(),
-                $command->getAggregateUuid()
-            ));
-
-            return false;
+                NULL,
+                $command
+            );
         }
 
         if (0 !== $aggregate->getVersion()) {
-            $this->messageBus->dispatch(new Message(
+            throw new CommandValidationException(
                 'Aggregate already exists',
                 CODE_CONFLICT,
-                $command->getUuid(),
-                $command->getAggregateUuid()
-            ));
-
-            return false;
+                NULL,
+                $command
+            );
         }
 
         return true;

@@ -4,26 +4,23 @@ declare(strict_types=1);
 
 namespace <?= $bundleNamespace; ?>\Handler;
 
-use <?= $bundleNamespace; ?>\Command\<?= $commandName; ?>Command;
 use <?= $bundleNamespace; ?>\Event\<?= $commandName; ?>Event;
 use <?= $aggregateNamespace; ?>\<?= $aggregateClass; ?>;
 use RevisionTen\CQRS\Interfaces\AggregateInterface;
 use RevisionTen\CQRS\Interfaces\CommandInterface;
 use RevisionTen\CQRS\Interfaces\EventInterface;
 use RevisionTen\CQRS\Interfaces\HandlerInterface;
-use RevisionTen\CQRS\Message\Message;
-use RevisionTen\CQRS\Handler\Handler;
 
-final class <?= $commandName; ?>Handler extends Handler implements HandlerInterface
+final class <?= $commandName; ?>Handler implements HandlerInterface
 {
     /**
      * {@inheritdoc}
      *
      * @var <?= $aggregateClass; ?> $aggregate
      */
-    public function execute(CommandInterface $command, AggregateInterface $aggregate): AggregateInterface
+    public function execute(EventInterface $event, AggregateInterface $aggregate): AggregateInterface
     {
-        $payload = $command->getPayload();
+        $payload = $event->getPayload();
 
         // Change Aggregate state here.
 
@@ -33,17 +30,15 @@ final class <?= $commandName; ?>Handler extends Handler implements HandlerInterf
     /**
      * {@inheritdoc}
      */
-    public static function getCommandClass(): string
-    {
-        return <?= $commandName; ?>Command::class;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function createEvent(CommandInterface $command): EventInterface
     {
-        return new <?= $commandName; ?>Event($command);
+        return new <?= $commandName; ?>Event(
+            $command->getAggregateUuid(),
+            $command->getUuid(),
+            $command->getOnVersion() + 1,
+            $command->getUser(),
+            $command->getPayload()
+        );
     }
 
     /**

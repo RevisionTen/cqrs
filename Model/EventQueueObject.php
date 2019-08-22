@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace RevisionTen\CQRS\Model;
 
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use function is_string;
+use function json_decode;
+use function json_encode;
 
 /**
- * Class EventQeueObject.
+ * Class EventQueueObject.
  *
  * @ORM\Entity
  * @ORM\Table(name="event_qeue", uniqueConstraints={
@@ -15,7 +19,7 @@ use Doctrine\ORM\Mapping as ORM;
  *          columns={"version", "uuid", "user"})
  * })
  */
-class EventQeueObject
+class EventQueueObject
 {
     /**
      * @var int
@@ -44,11 +48,9 @@ class EventQeueObject
     private $version;
 
     /**
-     * TODO: Change to datetime_immutable once https://github.com/doctrine/doctrine2/pull/6988 is fixed.
-     *
      * @var \DateTimeImmutable
      *
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime_immutable")
      */
     private $created;
 
@@ -84,7 +86,7 @@ class EventQeueObject
     private $message;
 
     /**
-     * EventQeueObject constructor.
+     * EventQueueObject constructor.
      *
      * @param EventStreamObject $eventStreamObject
      */
@@ -102,7 +104,7 @@ class EventQeueObject
     }
 
     /**
-     * Transforms the EventQeueObject into an EventStreamObject
+     * Transforms the EventQueueObject into an EventStreamObject
      * and returns it.
      *
      * @return EventStreamObject
@@ -142,7 +144,7 @@ class EventQeueObject
     /**
      * @param string $uuid
      *
-     * @return EventQeueObject
+     * @return EventQueueObject
      */
     public function setUuid($uuid): self
     {
@@ -162,7 +164,7 @@ class EventQeueObject
     /**
      * @param string $commandUuid
      *
-     * @return EventQeueObject
+     * @return EventQueueObject
      */
     public function setCommandUuid(string $commandUuid): self
     {
@@ -182,7 +184,7 @@ class EventQeueObject
     /**
      * @param int $version
      *
-     * @return EventQeueObject
+     * @return EventQueueObject
      */
     public function setVersion($version): self
     {
@@ -194,16 +196,15 @@ class EventQeueObject
     /**
      * @return \DateTimeImmutable
      */
-    public function getCreated(): \DateTimeImmutable
+    public function getCreated(): DateTimeImmutable
     {
-        // TODO: remove createFromMutable once https://github.com/doctrine/doctrine2/pull/6988 is fixed.
-        return ($this->created instanceof \DateTimeImmutable) ? $this->created : \DateTimeImmutable::createFromMutable($this->created);
+        return $this->created;
     }
 
     /**
      * @param \DateTimeImmutable $created
      *
-     * @return EventQeueObject
+     * @return EventQueueObject
      */
     public function setCreated($created): self
     {
@@ -223,7 +224,7 @@ class EventQeueObject
     /**
      * @param string $event
      *
-     * @return EventQeueObject
+     * @return EventQueueObject
      */
     public function setEvent($event): self
     {
@@ -243,7 +244,7 @@ class EventQeueObject
     /**
      * @param string $aggregateClass
      *
-     * @return EventQeueObject
+     * @return EventQueueObject
      */
     public function setAggregateClass($aggregateClass): self
     {
@@ -263,7 +264,7 @@ class EventQeueObject
     /**
      * @param int $user
      *
-     * @return EventQeueObject
+     * @return EventQueueObject
      */
     public function setUser($user): self
     {
@@ -277,13 +278,13 @@ class EventQeueObject
      */
     public function getPayload(): array
     {
-        return \is_string($this->payload) ? json_decode($this->payload, true) : $this->payload;
+        return is_string($this->payload) ? json_decode($this->payload, true) : $this->payload;
     }
 
     /**
      * @param array $payload
      *
-     * @return EventQeueObject
+     * @return EventQueueObject
      */
     public function setPayload($payload): self
     {
@@ -303,7 +304,7 @@ class EventQeueObject
     /**
      * @param string $message
      *
-     * @return EventQeueObject
+     * @return EventQueueObject
      */
     public function setMessage($message): self
     {
@@ -312,3 +313,5 @@ class EventQeueObject
         return $this;
     }
 }
+
+class_alias('RevisionTen\CQRS\Model\EventQueueObject', 'RevisionTen\CQRS\Model\EventQeueObject');

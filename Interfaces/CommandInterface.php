@@ -7,18 +7,29 @@ namespace RevisionTen\CQRS\Interfaces;
 interface CommandInterface
 {
     /**
+     * CommandInterface constructor.
+     *
+     * @param int         $user
+     * @param string|NULL $commandUuid
+     * @param string      $aggregateUuid
+     * @param int         $onVersion
+     * @param array       $payload
+     */
+    public function __construct(int $user, string $commandUuid = null, string $aggregateUuid, int $onVersion, array $payload);
+
+    /**
      * Returns the Handler class associated with this Command.
      *
      * @return string
      */
-    public function getHandlerClass(): string;
+    public static function getHandlerClass(): string;
 
     /**
      * Returns the Aggregate class associated with this Command.
      *
      * @return string
      */
-    public function getAggregateClass(): string;
+    public static function getAggregateClass(): string;
 
     /**
      * Implemented by abstract Command class.
@@ -40,13 +51,6 @@ interface CommandInterface
      * @return string
      */
     public function getUuid(): string;
-
-    /**
-     * Implemented by abstract Command class.
-     *
-     * @return callable
-     */
-    public function getListener(): ?callable;
 
     /**
      * Implemented by abstract Command class.

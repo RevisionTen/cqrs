@@ -7,25 +7,18 @@ namespace RevisionTen\CQRS\Interfaces;
 interface EventInterface
 {
     /**
-     * EventInterface constructor.
-     *
-     * @param CommandInterface $command
-     */
-    public function __construct(CommandInterface $command);
-
-    /**
-     * Returns the Command class associated with this Event.
+     * The type to aggregate this event is for.
      *
      * @return string
      */
-    public static function getCommandClass(): string;
+    public static function getAggregateClass(): string;
 
     /**
-     * Returns the Listener class associated with this Event.
+     * The handler for this event.
      *
      * @return string
      */
-    public static function getListenerClass(): string;
+    public static function getHandlerClass(): string;
 
     /**
      * Returns the human readable message that describes this Event.
@@ -35,16 +28,40 @@ interface EventInterface
     public function getMessage(): string;
 
     /**
-     * Return the Event code.
+     * EventInterface constructor.
+     *
+     * @param string $aggregateUuid
+     * @param string $commandUuid
+     * @param int    $version
+     * @param int    $user
+     * @param array  $payload
+     */
+    public function __construct(string $aggregateUuid, string $commandUuid, int $version, int $user, array $payload);
+
+    /**
+     * @return string
+     */
+    public function getAggregateUuid(): string;
+
+    /**
+     * @return string
+     */
+    public function getCommandUuid(): string;
+
+    /**
+     * The version of the aggregate after this event happened to it.
      *
      * @return int
      */
-    public static function getCode(): int;
+    public function getVersion(): int;
 
     /**
-     * Implemented by abstract Event class.
-     *
-     * @return CommandInterface
+     * @return int
      */
-    public function getCommand(): CommandInterface;
+    public function getUser(): int;
+
+    /**
+     * @return array
+     */
+    public function getPayload(): array;
 }
