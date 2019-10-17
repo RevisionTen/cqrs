@@ -81,8 +81,15 @@ class CommandBus
             throw new InterfaceException($commandClass.' must implement '.CommandInterface::class);
         }
 
-        /** @var CommandInterface $commandClass */
-        $aggregate = $this->aggregateFactory->build($aggregateUuid, $commandClass::getAggregateClass());
+        if ($queueEvents && -1 !== $user) {
+            // Get aggregate as the user sees it.
+            /** @var CommandInterface $commandClass */
+            $aggregate = $this->aggregateFactory->build($aggregateUuid, $commandClass::getAggregateClass(), null, $user);
+        } else {
+            /** @var CommandInterface $commandClass */
+            $aggregate = $this->aggregateFactory->build($aggregateUuid, $commandClass::getAggregateClass());
+        }
+
         $aggregateVersion = $aggregate->getVersion();
 
         $commandUuid = Uuid::uuid1()->toString();
