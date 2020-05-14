@@ -9,9 +9,9 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use function define;
 use function defined;
 
-class CqrsBundle extends Bundle
+class CQRSBundle extends Bundle
 {
-    public const VERSION = '2.0.4';
+    public const VERSION = '2.0.5';
 
     private function setConstants(): void
     {
@@ -51,5 +51,3 @@ class CqrsBundle extends Bundle
         $this->setConstants();
     }
 }
-
-class_alias("RevisionTen\CQRS\CqrsBundle", "RevisionTen\CQRS\CQRSBundle");
