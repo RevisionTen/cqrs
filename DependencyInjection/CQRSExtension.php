@@ -8,7 +8,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
-class CqrsExtension extends Extension implements PrependExtensionInterface
+class CQRSExtension extends Extension implements PrependExtensionInterface
 {
 
     /**
