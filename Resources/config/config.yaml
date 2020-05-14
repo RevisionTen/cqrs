@@ -22,10 +22,10 @@ services:
 doctrine:
     orm:
         mappings:
-            CqrsBundle:
+            CQRSBundle:
                 mapping: true
                 type: annotation
                 dir: 'Model'
-                alias: CqrsBundle
+                alias: CQRSBundle
                 prefix: 'RevisionTen\CQRS\Model'
                 is_bundle: true
