@@ -23,7 +23,7 @@
     </php>
 
     <testsuites>
-        <testsuite name="CqrsBundle Test Suite">
+        <testsuite name="CQRSBundle Test Suite">
             <directory>vendor/revisionTen/cqrs/Tests/</directory>
         </testsuite>
     </testsuites>

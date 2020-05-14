@@ -11,7 +11,7 @@ use function defined;
 
 class CQRSBundle extends Bundle
 {
-    public const VERSION = '2.0.6';
+    public const VERSION = '2.0.7';
 
     private function setConstants(): void
     {
