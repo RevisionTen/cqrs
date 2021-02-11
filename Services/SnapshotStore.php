@@ -16,22 +16,10 @@ use function json_encode;
 
 class SnapshotStore
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    private $em;
+    private EntityManagerInterface $em;
 
-    /**
-     * @var MessageBus
-     */
-    private $messageBus;
+    private MessageBus $messageBus;
 
-    /**
-     * EventStore constructor.
-     *
-     * @param EntityManagerInterface $em
-     * @param MessageBus             $messageBus
-     */
     public function __construct(EntityManagerInterface $em, MessageBus $messageBus)
     {
         $this->em = $em;
@@ -57,7 +45,9 @@ class SnapshotStore
 
         $criteria->orderBy(['version' => Criteria::DESC]);
 
-        /** @var \Doctrine\ORM\EntityRepository $snapshotRepository */
+        /**
+         * @var \Doctrine\ORM\EntityRepository $snapshotRepository
+         */
         $snapshotRepository = $this->em->getRepository(Snapshot::class);
 
         $snapshot = $snapshotRepository->matching($criteria)->first();
@@ -68,7 +58,7 @@ class SnapshotStore
     /**
      * Saves a Snapshot.
      *
-     * @param \RevisionTen\CQRS\Interfaces\AggregateInterface $aggregate
+     * @param AggregateInterface $aggregate
      */
     public function save(AggregateInterface $aggregate): void
     {

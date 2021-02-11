@@ -11,10 +11,7 @@ class AggregateUpdatedEvent extends Event
 {
     public const NAME = 'aggregate.updated';
 
-    /**
-     * @var EventInterface
-     */
-    protected $event;
+    protected EventInterface $event;
 
     public function __construct(EventInterface $event)
     {

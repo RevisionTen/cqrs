@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace RevisionTen\CQRS\Services;
 
+use Exception;
 use RevisionTen\CQRS\Exception\AggregateException;
 use RevisionTen\CQRS\Interfaces\AggregateInterface;
 use RevisionTen\CQRS\Interfaces\EventInterface;
@@ -19,34 +20,14 @@ use function get_object_vars;
 
 class AggregateFactory
 {
-    /**
-     * @var EventStore
-     */
-    private $eventStore;
+    private EventStore $eventStore;
 
-    /**
-     * @var MessageBus
-     */
-    private $messageBus;
+    private MessageBus $messageBus;
 
-    /**
-     * @var SnapshotStore
-     */
-    private $snapshotStore;
+    private SnapshotStore $snapshotStore;
 
-    /**
-     * @var ContainerInterface
-     */
-    private $container;
+    private ContainerInterface $container;
 
-    /**
-     * AggregateFactory constructor.
-     *
-     * @param \RevisionTen\CQRS\Services\MessageBus                     $messageBus
-     * @param \RevisionTen\CQRS\Services\EventStore                     $eventStore
-     * @param \RevisionTen\CQRS\Services\SnapshotStore                  $snapshotStore
-     * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
-     */
     public function __construct(MessageBus $messageBus, EventStore $eventStore, SnapshotStore $snapshotStore, ContainerInterface $container)
     {
         $this->messageBus = $messageBus;
@@ -58,19 +39,16 @@ class AggregateFactory
     /**
      * @param string|null $aggregateClass
      *
-     * @return array
-     * @throws \Exception
+     * @return AggregateInterface[]
+     *
+     * @throws Exception
      */
-    public function findAggregates(string $aggregateClass = null): array
+    public function findAggregates(?string $aggregateClass = null): array
     {
         $aggregates = [];
 
         $eventStreamObjects = $this->eventStore->findAggregates($aggregateClass);
-
         if ($eventStreamObjects) {
-            /**
-             * @var EventStreamObject $eventStreamObject
-             */
             foreach ($eventStreamObjects as $eventStreamObject) {
                 $aggregates[] = $this->build($eventStreamObject->getUuid(), $eventStreamObject->getAggregateClass());
             }
@@ -89,7 +67,7 @@ class AggregateFactory
      *
      * @return AggregateInterface
      */
-    public function build(string $uuid, string $aggregateClass, int $max_version = null, int $user = null): AggregateInterface
+    public function build(string $uuid, string $aggregateClass, ?int $max_version = null, ?int $user = null): AggregateInterface
     {
         try {
             /**
@@ -98,22 +76,14 @@ class AggregateFactory
             $aggregate = new $aggregateClass($uuid);
 
             if ($aggregate instanceof AggregateInterface) {
-                /**
-                 * Get latest matching Snapshot.
-                 *
-                 * @var Snapshot $snapshot
-                 */
+                // Get latest matching Snapshot.
                 $snapshot = $this->snapshotStore->find($uuid, $max_version);
                 $min_version = $snapshot ? ($snapshot->getVersion() + 1) : null;
                 if ($snapshot) {
                     $aggregate = $this->loadFromSnapshot($aggregate, $snapshot);
                 }
 
-                /**
-                 * Get Event Stream Objects.
-                 *
-                 * @var EventStreamObject[] $eventStreamObjects
-                 */
+                // Get Event Stream Objects.
                 $eventStreamObjects = $this->eventStore->find($uuid, $max_version, $min_version);
                 if ($eventStreamObjects) {
                     $aggregate = $this->loadFromHistory($aggregate, $eventStreamObjects);
@@ -123,11 +93,7 @@ class AggregateFactory
                 $aggregate->setStreamVersion($aggregate->getVersion());
 
                 if (null !== $user) {
-                    /**
-                     * Get queued Event Stream Objects.
-                     *
-                     * @var EventStreamObject[] $eventStreamObjects
-                     */
+                    // Get queued Event Stream Objects.
                     $eventStreamObjects = $this->eventStore->findQueued($uuid, $user, $max_version, $aggregate->getVersion() + 1);
                     if ($eventStreamObjects) {
                         $aggregate = $this->loadFromHistory($aggregate, $eventStreamObjects);
@@ -154,8 +120,8 @@ class AggregateFactory
     /**
      * Load an Aggregate from provided Event Stream Objects.
      *
-     * @param AggregateInterface $aggregate
-     * @param array              $eventStreamObjects
+     * @param AggregateInterface  $aggregate
+     * @param EventStreamObject[] $eventStreamObjects
      *
      * @return AggregateInterface
      */
@@ -164,11 +130,7 @@ class AggregateFactory
         // Arrays start at zero ;)
         $count = count($eventStreamObjects) - 1;
 
-        /**
-         * Get events and replay them.
-         *
-         * @var EventStreamObject $eventStreamObject
-         */
+        // Get events and replay them.
         foreach ($eventStreamObjects as $key => $eventStreamObject) {
             $uuid = $eventStreamObject->getUuid();
 
@@ -252,21 +214,20 @@ class AggregateFactory
     public function applyChanges(AggregateInterface $aggregate): AggregateInterface
     {
         // Execute the handlers of pending Events.
-        /**
-         * @var EventInterface $event
-         */
         foreach ($aggregate->getPendingEvents() as $event) {
-            /**
-             * Get Handler for Command.
-             *
-             * @var HandlerInterface $handler
-             */
+            // Get Handler for Command.
             $handlerClass = $event::getHandlerClass();
 
             // Try to get the handler as a service or instantiate it.
             try {
+                /**
+                 * @var HandlerInterface $handler
+                 */
                 $handler = $this->container->get($handlerClass);
             } catch (ServiceNotFoundException $e) {
+                /**
+                 * @var HandlerInterface $handler
+                 */
                 $handler = new $handlerClass();
             }
 

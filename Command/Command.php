@@ -12,42 +12,16 @@ use Ramsey\Uuid\Uuid;
  */
 abstract class Command
 {
-    /**
-     * @var string
-     */
-    private $uuid;
+    private string $uuid;
 
-    /**
-     * @var string
-     */
-    private $aggregateUuid;
+    private string $aggregateUuid;
 
-    /**
-     * @var array
-     */
-    public $payload;
+    public array $payload;
 
-    /**
-     * @var int
-     */
-    private $onVersion;
+    private int $onVersion;
 
-    /**
-     * @var int
-     */
-    private $user;
+    private int $user;
 
-    /**
-     * Command constructor.
-     *
-     * @param int           $user
-     * @param string|null   $commandUuid
-     * @param string        $aggregateUuid
-     * @param int           $onVersion
-     * @param array         $payload
-     *
-     * @throws \Exception
-     */
     public function __construct(int $user, string $commandUuid = null, string $aggregateUuid, int $onVersion, array $payload)
     {
         if (null === $commandUuid) {
@@ -61,41 +35,26 @@ abstract class Command
         $this->payload = $payload;
     }
 
-    /**
-     * @return array
-     */
     public function getPayload(): array
     {
         return $this->payload;
     }
 
-    /**
-     * @return string
-     */
     public function getAggregateUuid(): string
     {
         return $this->aggregateUuid;
     }
 
-    /**
-     * @return string
-     */
     public function getUuid(): string
     {
         return $this->uuid;
     }
 
-    /**
-     * @return int
-     */
     public function getOnVersion(): int
     {
         return $this->onVersion;
     }
 
-    /**
-     * @return int
-     */
     public function getUser(): int
     {
         return $this->user;

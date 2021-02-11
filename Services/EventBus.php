@@ -17,28 +17,12 @@ use function get_class;
 
 class EventBus
 {
-    /**
-     * @var EventStore
-     */
-    private $eventStore;
+    private EventStore $eventStore;
 
-    /**
-     * @var MessageBus
-     */
-    private $messageBus;
+    private MessageBus $messageBus;
 
-    /**
-     * @var EventDispatcherInterface
-     */
-    private $eventDispatcher;
+    private EventDispatcherInterface $eventDispatcher;
 
-    /**
-     * EventBus constructor.
-     *
-     * @param EventStore               $eventStore
-     * @param MessageBus               $messageBus
-     * @param EventDispatcherInterface $eventDispatcher
-     */
     public function __construct(EventStore $eventStore, MessageBus $messageBus, EventDispatcherInterface $eventDispatcher)
     {
         $this->eventStore = $eventStore;
@@ -49,17 +33,15 @@ class EventBus
     /**
      * Dispatch all events to observing event handlers and save them to the Event Store.
      *
-     * @param array $events
-     * @param bool  $queueEvents
+     * @param EventInterface[] $events
+     * @param bool             $queueEvents
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function publish(array $events, bool $queueEvents = false): void
     {
         $eventStreamObjects = [];
-        /**
-         * @var EventInterface $event
-         */
+
         foreach ($events as $event) {
             // Save the event to the event stream.
             $eventStreamObject = new EventStreamObject();
@@ -129,20 +111,15 @@ class EventBus
      * @param EventQueueObject[] $eventQueueObjects
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function publishQueued(array $eventQueueObjects): bool
     {
-        $eventStreamObjects = array_map(static function ($eventQueueObject) {
-            /* @var EventQueueObject $eventQueueObject */
+        $eventStreamObjects = array_map(static function (EventQueueObject $eventQueueObject) {
             return $eventQueueObject->getEventStreamObject();
         }, $eventQueueObjects);
 
-        /**
-         * Add EventStreamObjects to list of EventStreamObjects that should be persisted.
-         *
-         * @var EventStreamObject $eventStreamObject
-         */
+        // Add EventStreamObjects to list of EventStreamObjects that should be persisted.
         foreach ($eventStreamObjects as $eventStreamObject) {
             $this->eventStore->add($eventStreamObject);
         }
@@ -165,11 +142,7 @@ class EventBus
             return false;
         }
 
-        /**
-         * Remove EventQueueObjects from queue.
-         *
-         * @var EventQueueObject $eventQueueObject
-         */
+        // Remove EventQueueObjects from queue.
         foreach ($eventQueueObjects as $eventQueueObject) {
             $this->eventStore->remove($eventQueueObject);
         }
@@ -216,13 +189,8 @@ class EventBus
      */
     private function invokeListeners(array $events): void
     {
-        /**
-         * Execute Listener if Event was recorded.
-         *
-         * @var EventInterface $event
-         */
+        // Execute Listener if Event was recorded.
         foreach ($events as $event) {
-
             // Dispatch the event.
             $this->eventDispatcher->dispatch($event);
         }

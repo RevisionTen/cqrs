@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace RevisionTen\CQRS\Services;
 
+use Exception;
 use Ramsey\Uuid\Uuid;
 use RevisionTen\CQRS\Exception\CommandValidationException;
 use RevisionTen\CQRS\Exception\InterfaceException;
@@ -20,39 +21,19 @@ use function in_array;
 
 class CommandBus
 {
-    /**
-     * @var EventBus
-     */
-    private $eventBus;
+    private EventBus $eventBus;
+
+    private MessageBus $messageBus;
+
+    public AggregateFactory $aggregateFactory;
+
+    private ContainerInterface $container;
 
     /**
-     * @var MessageBus
+     * @var AggregateInterface[]
      */
-    private $messageBus;
+    private array $aggregates = [];
 
-    /**
-     * @var AggregateFactory
-     */
-    public $aggregateFactory;
-
-    /**
-     * @var ContainerInterface
-     */
-    private $container;
-
-    /**
-     * @var array
-     */
-    private $aggregates = [];
-
-    /**
-     * CommandBus constructor.
-     *
-     * @param \RevisionTen\CQRS\Services\EventBus                       $eventBus
-     * @param \RevisionTen\CQRS\Services\MessageBus                     $messageBus
-     * @param \RevisionTen\CQRS\Services\AggregateFactory               $aggregateFactory
-     * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
-     */
     public function __construct(EventBus $eventBus, MessageBus $messageBus, AggregateFactory $aggregateFactory, ContainerInterface $container)
     {
         $this->eventBus = $eventBus;
@@ -73,26 +54,30 @@ class CommandBus
      * @return bool Returns true if the command was accepted.
      *
      * @throws \RevisionTen\CQRS\Exception\InterfaceException
-     * @throws \Exception
+     * @throws Exception
      */
     public function execute(string $commandClass, string $aggregateUuid, ?array $payload = [], ?int $user = -1, ?bool $queueEvents = false): bool
     {
+        /**
+         * @var CommandInterface $commandClass
+         */
         if (!in_array(CommandInterface::class, class_implements($commandClass), true)) {
             throw new InterfaceException($commandClass.' must implement '.CommandInterface::class);
         }
 
         if ($queueEvents && -1 !== $user) {
             // Get aggregate as the user sees it.
-            /** @var CommandInterface $commandClass */
             $aggregate = $this->aggregateFactory->build($aggregateUuid, $commandClass::getAggregateClass(), null, $user);
         } else {
-            /** @var CommandInterface $commandClass */
             $aggregate = $this->aggregateFactory->build($aggregateUuid, $commandClass::getAggregateClass());
         }
 
         $aggregateVersion = $aggregate->getVersion();
 
         $commandUuid = Uuid::uuid1()->toString();
+        /**
+         * @var CommandInterface $command
+         */
         $command = new $commandClass($user, $commandUuid, $aggregateUuid, $aggregateVersion, $payload);
 
         return $this->dispatch($command, $queueEvents);
@@ -107,7 +92,7 @@ class CommandBus
      * @param \RevisionTen\CQRS\Interfaces\CommandInterface $command
      * @param \RevisionTen\CQRS\Interfaces\HandlerInterface $handler
      *
-     * @throws \Exception
+     * @throws Exception
      */
     private function handleCommand(CommandInterface $command, HandlerInterface $handler): void
     {
@@ -148,11 +133,7 @@ class CommandBus
             ));
         } elseif ($validCommand) {
             try {
-                /**
-                 * Create Event for Command.
-                 *
-                 * @var EventInterface $event
-                 */
+                // Create Event for Command.
                 $event = $handler->createEvent($command);
 
                 if ($event instanceof EventInterface) {
@@ -191,7 +172,7 @@ class CommandBus
      * @param bool                                          $queueEvents
      *
      * @return bool Returns true if the command was accepted.
-     * @throws \Exception
+     * @throws Exception
      */
     public function dispatch(CommandInterface $command, bool $queueEvents = false): bool
     {
@@ -200,17 +181,19 @@ class CommandBus
                 // Reset aggregates.
                 $this->aggregates = [];
 
-                /**
-                 * Get Handler for Command.
-                 *
-                 * @var HandlerInterface $handler
-                 */
+                // Get Handler for Command.
                 $handlerClass = $command::getHandlerClass();
 
                 // Try to get the handler as a service or instantiate it.
                 try {
+                    /**
+                     * @var HandlerInterface $handler
+                     */
                     $handler = $this->container->get($handlerClass);
                 } catch (ServiceNotFoundException $e) {
+                    /**
+                     * @var HandlerInterface $handler
+                     */
                     $handler = new $handlerClass();
                 }
 
@@ -222,11 +205,8 @@ class CommandBus
                     // Check for events on aggregates, pass them to EventBus#publish()
                     $events = [];
 
-                    /** @var AggregateInterface $aggregate */
                     foreach ($this->aggregates as $aggregate) {
-                        /** @var array $pendingEvents */
                         $pendingEvents = $aggregate->getPendingEvents();
-
                         array_push($events, ...$pendingEvents);
                     }
 
@@ -247,7 +227,6 @@ class CommandBus
             ));
         }
 
-        /** @var Message[] $messages */
         $messages = $this->messageBus->getMessagesByCommand($command->getUuid());
 
         // Returns true if the command was accepted.
