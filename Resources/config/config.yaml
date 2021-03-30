@@ -1,10 +1,18 @@
 services:
-    messagebus: # Todo: Remove this alias once the forms bundle is cleaned up.
-        alias: RevisionTen\CQRS\Services\MessageBus
+    RevisionTen\CQRS\Services\AggregateFactory:
         public: true
-    RevisionTen\CQRS\Services\:
-        resource: '../../Services/*'
-        exclude: '../../Services/{MessageBus.php}'
+        autowire: true
+        arguments:
+            $container: '@service_container'
+    RevisionTen\CQRS\Services\CommandBus:
+        public: true
+        autowire: true
+        arguments:
+            $container: '@service_container'
+    RevisionTen\CQRS\Services\EventBus:
+        public: true
+        autowire: true
+    RevisionTen\CQRS\Services\EventStore:
         public: true
         autowire: true
     RevisionTen\CQRS\Services\MessageBus:
@@ -14,10 +22,18 @@ services:
             $env: '%kernel.environment%'
         tags:
             - { name: monolog.logger, channel: cqrs }
+    RevisionTen\CQRS\Services\SnapshotStore:
+        public: true
+        autowire: true
     RevisionTen\CQRS\Maker\CommandMaker:
         public: true
         autowire: true
         tags: [maker.command]
+
+    # Legacy.
+    messagebus: # Todo: Remove this alias once the forms bundle is cleaned up.
+        alias: RevisionTen\CQRS\Services\MessageBus
+        public: true
 
 doctrine:
     orm:
