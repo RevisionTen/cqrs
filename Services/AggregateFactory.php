@@ -176,7 +176,7 @@ class AggregateFactory
      */
     public function loadFromSnapshot(AggregateInterface $aggregate, Snapshot $snapshot): AggregateInterface
     {
-        $snapshotData = $snapshot->getPayload();
+        $snapshotData = $snapshot->getAggregate();
 
         $aggregate->setVersion($snapshot->getVersion());
         $aggregate->setSnapshotVersion($snapshot->getVersion());
@@ -194,8 +194,8 @@ class AggregateFactory
                 continue;
             }
 
-            if (isset($snapshotData[$property])) {
-                $aggregate->{$property} = $snapshotData[$property];
+            if (property_exists($snapshotData, $property)) {
+                $aggregate->{$property} = $snapshotData->{$property};
             }
         }
 

@@ -7,6 +7,8 @@ namespace RevisionTen\CQRS\Model;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use function is_string;
+use function serialize;
+use function unserialize;
 use function json_decode;
 use function json_encode;
 
@@ -46,7 +48,7 @@ class Snapshot
     /**
      * @ORM\Column(type="text")
      */
-    private string $payload;
+    private string $aggregateData;
 
     /**
      * @ORM\Column(type="datetime_immutable")
@@ -114,14 +116,14 @@ class Snapshot
         return $this;
     }
 
-    public function getPayload(): array
+    public function getAggregate(): AggregateInterface
     {
-        return is_string($this->payload) ? json_decode($this->payload, true) : $this->payload;
+        return is_string($this->aggregateData) ? unserialize($this->aggregateData, ['allowed_classes' => true]) : $this->aggregateData;
     }
 
-    public function setPayload(array $payload): self
+    public function setAggregate(AggregateInterface $aggregate): self
     {
-        $this->payload = json_encode($payload);
+        $this->aggregateData = serialize($aggregate);
 
         return $this;
     }

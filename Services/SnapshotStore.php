@@ -11,8 +11,6 @@ use RevisionTen\CQRS\Model\Snapshot;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManagerInterface;
 use function get_class;
-use function json_decode;
-use function json_encode;
 
 class SnapshotStore
 {
@@ -69,8 +67,7 @@ class SnapshotStore
         $snapshot->setAggregateModified($aggregate->getModified());
         $snapshot->setAggregateClass(get_class($aggregate));
         $snapshot->setHistory($aggregate->getHistory());
-        $aggregateData = json_decode(json_encode($aggregate), true);
-        $snapshot->setPayload($aggregateData);
+        $snapshot->setAggregate($aggregate);
 
         try {
             $this->em->persist($snapshot);
