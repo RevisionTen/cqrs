@@ -79,8 +79,11 @@ class SnapshotStore
         $snapshot->setAggregateModified($aggregate->getModified());
         $snapshot->setAggregateClass(get_class($aggregate));
         $snapshot->setHistory($aggregate->getHistory());
+
         $aggregateData = json_decode(json_encode($aggregate), true);
         $snapshot->setPayload($aggregateData);
+
+        $snapshot->setAggregateData($aggregate);
 
         try {
             $this->em->persist($snapshot);
