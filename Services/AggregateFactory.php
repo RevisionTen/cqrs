@@ -178,26 +178,22 @@ class AggregateFactory
     {
         $snapshotData = $snapshot->getAggregate();
 
+        // Load data from other public properties.
+        $properties = get_object_vars($aggregate);
+
+        foreach ($properties as $property => $existingValue) {
+            if (property_exists($snapshotData, $property)) {
+                $aggregate->{$property} = $snapshotData->{$property};
+            }
+        }
+
+        // Todo: Is this still needed?
         $aggregate->setVersion($snapshot->getVersion());
         $aggregate->setSnapshotVersion($snapshot->getVersion());
         $aggregate->setCreated($snapshot->getAggregateCreated());
         $aggregate->setModified($snapshot->getAggregateModified());
         $aggregate->setUuid($snapshot->getUuid());
         $aggregate->setHistory($snapshot->getHistory());
-
-        // Load data from other public properties.
-        $properties = get_object_vars($aggregate);
-
-        foreach ($properties as $property => $existingValue) {
-            // Skip Modified and Created public properties.
-            if ('created' === $property || 'modified' === $property) {
-                continue;
-            }
-
-            if (property_exists($snapshotData, $property)) {
-                $aggregate->{$property} = $snapshotData->{$property};
-            }
-        }
 
         return $aggregate;
     }
