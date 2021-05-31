@@ -6,6 +6,7 @@ namespace RevisionTen\CQRS\Model;
 
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use RevisionTen\CQRS\Interfaces\AggregateInterface;
 use function is_string;
 use function serialize;
 use function unserialize;
@@ -28,7 +29,7 @@ class Snapshot
      * @ORM\Id
      * @ORM\GeneratedValue
      */
-    private int $id;
+    private ?int $id = null;
 
     /**
      * @ORM\Column(type="string", options={"collation": "utf8_unicode_ci"})
