@@ -180,7 +180,7 @@ class EventBus
         foreach ($aggregates as $lastEventStreamObject) {
             // Rebuild last event.
             $event = EventStore::buildEventFromEventStreamObject($lastEventStreamObject);
-            $this->eventDispatcher->dispatch(new AggregateUpdatedEvent($event), AggregateUpdatedEvent::NAME);
+            $this->eventDispatcher->dispatch(new AggregateUpdatedEvent($event));
         }
     }
 

@@ -9,8 +9,6 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 class AggregateUpdatedEvent extends Event
 {
-    public const NAME = 'aggregate.updated';
-
     protected EventInterface $event;
 
     public function __construct(EventInterface $event)
