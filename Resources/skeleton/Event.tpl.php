@@ -11,25 +11,16 @@ use RevisionTen\CQRS\Interfaces\EventInterface;
 
 final class <?= $commandName; ?>Event extends AggregateEvent implements EventInterface
 {
-    /**
-     * {@inheritdoc}
-     */
     public static function getAggregateClass(): string
     {
         return <?= $aggregateClass; ?>::class;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public static function getHandlerClass(): string
     {
         return <?= $commandName; ?>Handler::class;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getMessage(): string
     {
         return '<?= $eventText; ?>';

@@ -8,20 +8,15 @@ use \Symfony\Contracts\EventDispatcher\Event;
 
 abstract class AggregateEvent extends Event
 {
-    /** @var string */
-    protected $aggregateUuid;
+    protected string $aggregateUuid;
 
-    /** @var string */
-    protected $commandUuid;
+    protected string $commandUuid;
 
-    /** @var int */
-    protected $version;
+    protected int $version;
 
-    /** @var int */
-    protected $user;
+    protected int $user;
 
-    /** @var array */
-    protected $payload;
+    protected array $payload;
 
     public function __construct(string $aggregateUuid, string $commandUuid, int $version, int $user, array $payload)
     {
@@ -32,41 +27,26 @@ abstract class AggregateEvent extends Event
         $this->payload = $payload;
     }
 
-    /**
-     * @return string
-     */
     public function getAggregateUuid(): string
     {
         return $this->aggregateUuid;
     }
 
-    /**
-     * @return string
-     */
     public function getCommandUuid(): string
     {
         return $this->commandUuid;
     }
 
-    /**
-     * @return int
-     */
     public function getVersion(): int
     {
         return $this->version;
     }
 
-    /**
-     * @return int
-     */
     public function getUser(): int
     {
         return $this->user;
     }
 
-    /**
-     * @return array
-     */
     public function getPayload(): array
     {
         return $this->payload;

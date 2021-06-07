@@ -16,38 +16,19 @@ use function is_array;
 
 class EventStore
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    private $em;
+    private EntityManagerInterface $em;
 
-    /**
-     * @var MessageBus
-     */
-    private $messageBus;
+    private MessageBus $messageBus;
 
-    /**
-     * EventStore constructor.
-     *
-     * @param EntityManagerInterface $em
-     * @param MessageBus             $messageBus
-     */
     public function __construct(EntityManagerInterface $em, MessageBus $messageBus)
     {
         $this->em = $em;
         $this->messageBus = $messageBus;
     }
 
-    /**
-     * @param EventStreamObject $eventStreamObject
-     *
-     * @return EventInterface
-     */
     public static function buildEventFromEventStreamObject(EventStreamObject $eventStreamObject): EventInterface
     {
-        /** @var EventInterface $eventClass */
         $eventClass = $eventStreamObject->getEvent();
-
         $commandUuid = $eventStreamObject->getCommandUuid();
         $aggregateUuid = $eventStreamObject->getUuid();
         $version = $eventStreamObject->getVersion();
@@ -57,7 +38,12 @@ class EventStore
         return new $eventClass($aggregateUuid, $commandUuid, $version, $user, $payload);
     }
 
-    public function findAggregates(string $aggregateClass = null): array
+    /**
+     * @param string|null $aggregateClass
+     *
+     * @return EventStreamObject[]
+     */
+    public function findAggregates(?string $aggregateClass = null): array
     {
         $criteria = [
             'version' => 1,
@@ -67,6 +53,9 @@ class EventStore
             $criteria['aggregateClass'] = $aggregateClass;
         }
 
+        /**
+         * @var EventStreamObject[] $eventStreamObjects
+         */
         $eventStreamObjects = $this->em->getRepository(EventStreamObject::class)->findBy($criteria);
 
         return is_array($eventStreamObjects) ? $eventStreamObjects : [];
@@ -79,7 +68,7 @@ class EventStore
      * @param int|null $max_version
      * @param int|null $min_version
      *
-     * @return array
+     * @return EventStreamObject[]
      */
     public function find(string $uuid, int $max_version = null, int $min_version = null): array
     {
@@ -94,14 +83,16 @@ class EventStore
      * @param int|null $max_version
      * @param int|null $min_version
      *
-     * @return array
+     * @return EventStreamObject[]
      */
     public function findQueued(string $uuid, int $user, int $max_version = null, int $min_version = null): array
     {
+        /**
+         * @var EventQueueObject[] $eventQueueObjects
+         */
         $eventQueueObjects = $this->findEventObjects(EventQueueObject::class, $uuid, $max_version, $min_version, $user);
 
         return array_map(static function ($eventQueueObject) {
-            /* @var EventQueueObject $eventQueueObject */
             return $eventQueueObject->getEventStreamObject();
         }, $eventQueueObjects);
     }
@@ -137,7 +128,9 @@ class EventStore
 
         $criteria->orderBy(['version' => Criteria::ASC]);
 
-        /** @var \Doctrine\ORM\EntityRepository $entityRepository */
+        /**
+         * @var \Doctrine\ORM\EntityRepository $entityRepository
+         */
         $entityRepository = $this->em->getRepository($objectClass);
 
         $eventObjectsResults = $entityRepository->matching($criteria);

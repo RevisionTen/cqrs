@@ -10,69 +10,35 @@ use RevisionTen\CQRS\Interfaces\EventInterface;
 
 class Aggregate implements AggregateInterface
 {
-    /**
-     * @var string
-     */
-    public $uuid;
+    public string $uuid;
+
+    public ?DateTimeImmutable $created = null;
+
+    public ?DateTimeImmutable $modified = null;
+
+    private int $version = 0;
+
+    private ?int $snapshotVersion = null;
+
+    private ?int $streamVersion = null;
 
     /**
-     * @var \DateTimeImmutable
+     * @var EventInterface[]
      */
-    public $created;
+    private array $pendingEvents = [];
 
-    /**
-     * @var \DateTimeImmutable
-     */
-    public $modified;
+    private array $history = [];
 
-    /**
-     * @var int
-     */
-    private $version = 0;
-
-    /**
-     * @var int
-     */
-    private $snapshotVersion;
-
-    /**
-     * @var int
-     */
-    private $streamVersion;
-
-    /**
-     * @var array
-     */
-    private $pendingEvents = [];
-
-    /**
-     * @var array
-     */
-    private $history = [];
-
-    /**
-     * Aggregate constructor.
-     *
-     * @param string $uuid
-     */
     public function __construct(string $uuid)
     {
         $this->uuid = $uuid;
     }
 
-    /**
-     * @return string
-     */
     public function getUuid(): string
     {
         return $this->uuid;
     }
 
-    /**
-     * @param string $uuid
-     *
-     * @return AggregateInterface
-     */
     public function setUuid(string $uuid): AggregateInterface
     {
         $this->uuid = $uuid;
@@ -80,79 +46,47 @@ class Aggregate implements AggregateInterface
         return $this;
     }
 
-    /**
-     * @return int|null
-     */
     public function getVersion(): ?int
     {
         return $this->version;
     }
 
-    /**
-     * @param $version
-     *
-     * @return AggregateInterface
-     */
-    public function setVersion($version): AggregateInterface
+    public function setVersion(int $version): AggregateInterface
     {
         $this->version = $version;
 
         return $this;
     }
 
-    /**
-     * @return int|null
-     */
     public function getSnapshotVersion(): ?int
     {
         return $this->snapshotVersion;
     }
 
-    /**
-     * @param int $snapshotVersion
-     *
-     * @return AggregateInterface
-     */
-    public function setSnapshotVersion($snapshotVersion = null): AggregateInterface
+    public function setSnapshotVersion(?int $snapshotVersion = null): AggregateInterface
     {
         $this->snapshotVersion = $snapshotVersion;
 
         return $this;
     }
 
-    /**
-     * @return int|null
-     */
     public function getStreamVersion(): ?int
     {
         return $this->streamVersion;
     }
 
-    /**
-     * @param int $streamVersion
-     *
-     * @return AggregateInterface
-     */
-    public function setStreamVersion($streamVersion): AggregateInterface
+    public function setStreamVersion(?int $streamVersion = null): AggregateInterface
     {
         $this->streamVersion = $streamVersion;
 
         return $this;
     }
 
-    /**
-     * @return \DateTimeImmutable
-     */
     public function getCreated(): ?DateTimeImmutable
     {
         return $this->created;
     }
 
-    /**
-     * @param \DateTimeImmutable $created
-     *
-     * @return AggregateInterface
-     */
     public function setCreated(DateTimeImmutable $created): AggregateInterface
     {
         $this->created = $created;
@@ -160,19 +94,11 @@ class Aggregate implements AggregateInterface
         return $this;
     }
 
-    /**
-     * @return \DateTimeImmutable
-     */
     public function getModified(): ?DateTimeImmutable
     {
         return $this->modified;
     }
 
-    /**
-     * @param \DateTimeImmutable $modified
-     *
-     * @return AggregateInterface
-     */
     public function setModified(DateTimeImmutable $modified): AggregateInterface
     {
         $this->modified = $modified;
@@ -180,21 +106,11 @@ class Aggregate implements AggregateInterface
         return $this;
     }
 
-    /**
-     * Returns an array of pending Events.
-     *
-     * @return array
-     */
     public function getPendingEvents(): array
     {
         return $this->pendingEvents;
     }
 
-    /**
-     * @param array $pendingEvents
-     *
-     * @return AggregateInterface
-     */
     public function setPendingEvents(array $pendingEvents): AggregateInterface
     {
         $this->pendingEvents = $pendingEvents;
@@ -202,11 +118,6 @@ class Aggregate implements AggregateInterface
         return $this;
     }
 
-    /**
-     * @param EventInterface $pendingEvent
-     *
-     * @return AggregateInterface
-     */
     public function addPendingEvent(EventInterface $pendingEvent): AggregateInterface
     {
         $this->pendingEvents[] = $pendingEvent;
@@ -214,19 +125,11 @@ class Aggregate implements AggregateInterface
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function getHistory(): array
     {
         return $this->history;
     }
 
-    /**
-     * @param array $history
-     *
-     * @return AggregateInterface
-     */
     public function setHistory(array $history): AggregateInterface
     {
         $this->history = $history;
@@ -234,11 +137,6 @@ class Aggregate implements AggregateInterface
         return $this;
     }
 
-    /**
-     * @param array $historyEntry
-     *
-     * @return AggregateInterface
-     */
     public function addToHistory(array $historyEntry): AggregateInterface
     {
         $this->history[] = $historyEntry;
@@ -246,11 +144,6 @@ class Aggregate implements AggregateInterface
         return $this;
     }
 
-    /**
-     * Decides if a Snapshot should be taken.
-     *
-     * @return bool
-     */
     public function shouldTakeSnapshot(): bool
     {
         return $this->getStreamVersion() >= $this->getSnapshotVersion() + 10;

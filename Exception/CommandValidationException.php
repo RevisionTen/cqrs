@@ -10,7 +10,7 @@ use Throwable;
 
 class CommandValidationException extends Exception implements ExceptionInterface
 {
-    public $command;
+    public ?CommandInterface $command;
 
     public function __construct($message = '', $code = CODE_ERROR, Throwable $previous = null, ?CommandInterface $command = null)
     {

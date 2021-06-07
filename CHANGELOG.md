@@ -4,9 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.8] - 2021-05-27
+## [3.0.0] - 2021-06-07
 ### Changed
-- Save snapshots as serialized PHP objects instead of json arrays
+- Upgrade to PHP 7.4+
+- Snapshots use serialized PHP object instead of json arrays. **Delete Snapshots** before upgrading.
 
 ## [2.0.7] - 2020-05-14
 ### Changed

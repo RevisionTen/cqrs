@@ -8,52 +8,24 @@ use DateTimeImmutable;
 
 class Message
 {
-    /**
-     * @var string
-     */
-    public $message;
+    public string $message;
 
-    /**
-     * @var int
-     */
-    public $code = CODE_DEFAULT;
+    public int $code = CODE_DEFAULT;
 
-    /**
-     * @var string|null
-     */
-    public $commandUuid;
+    public ?string $commandUuid;
 
-    /**
-     * @var string|null
-     */
-    public $aggregateUuid;
+    public ?string $aggregateUuid;
 
-    /**
-     * @var \DateTimeImmutable
-     */
-    public $created;
+    public DateTimeImmutable $created;
 
     /**
      * @var object|null
      */
     public $exception;
 
-    /**
-     * @var array|null
-     */
-    public $context;
+    public ?array $context;
 
-    /**
-     * Message constructor.
-     *
-     * @param string      $message
-     * @param int         $code
-     * @param string|NULL $commandUuid
-     * @param string|NULL $aggregateUuid
-     * @param null        $exception
-     * @param array|NULL  $context
-     */
-    public function __construct(string $message, int $code, string $commandUuid = null, string $aggregateUuid = null, $exception = null, array $context = null)
+    public function __construct(string $message, int $code, ?string $commandUuid = null, ?string $aggregateUuid = null, $exception = null, ?array $context = null)
     {
         $this->message = $message;
         $this->code = $code;

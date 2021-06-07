@@ -10,13 +10,10 @@ use function is_string;
 
 class MessageBus
 {
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
+    protected LoggerInterface $logger;
 
     /**
-     * @var array
+     * @var Message[]
      */
     private $messages = [];
 
@@ -56,7 +53,7 @@ class MessageBus
     /**
      * Returns an array of messages.
      *
-     * @return array
+     * @return Message[]
      */
     public function getMessages(): array
     {
@@ -92,12 +89,12 @@ class MessageBus
      *
      * @param $commandUuid
      *
-     * @return array
+     * @return Message[]
      */
     public function getMessagesByCommand($commandUuid): array
     {
         $messagesByUuid = [];
-        /** @var Message $message */
+
         foreach ($this->messages as $message) {
             if ($message->commandUuid === $commandUuid) {
                 $messagesByUuid[] = $message;
@@ -112,12 +109,12 @@ class MessageBus
      *
      * @param $aggregateUuid
      *
-     * @return array
+     * @return Message[]
      */
     public function getMessagesByAggregate($aggregateUuid): array
     {
         $messagesByUuid = [];
-        /** @var Message $message */
+
         foreach ($this->messages as $message) {
             if ($message->aggregateUuid === $aggregateUuid) {
                 $messagesByUuid[] = $message;
