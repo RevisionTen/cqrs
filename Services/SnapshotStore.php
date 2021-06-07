@@ -11,27 +11,13 @@ use RevisionTen\CQRS\Model\Snapshot;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManagerInterface;
 use function get_class;
-use function json_decode;
-use function json_encode;
 
 class SnapshotStore
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    private $em;
+    private EntityManagerInterface $em;
 
-    /**
-     * @var MessageBus
-     */
-    private $messageBus;
+    private MessageBus $messageBus;
 
-    /**
-     * EventStore constructor.
-     *
-     * @param EntityManagerInterface $em
-     * @param MessageBus             $messageBus
-     */
     public function __construct(EntityManagerInterface $em, MessageBus $messageBus)
     {
         $this->em = $em;
@@ -57,7 +43,9 @@ class SnapshotStore
 
         $criteria->orderBy(['version' => Criteria::DESC]);
 
-        /** @var \Doctrine\ORM\EntityRepository $snapshotRepository */
+        /**
+         * @var \Doctrine\ORM\EntityRepository $snapshotRepository
+         */
         $snapshotRepository = $this->em->getRepository(Snapshot::class);
 
         $snapshot = $snapshotRepository->matching($criteria)->first();
@@ -68,7 +56,7 @@ class SnapshotStore
     /**
      * Saves a Snapshot.
      *
-     * @param \RevisionTen\CQRS\Interfaces\AggregateInterface $aggregate
+     * @param AggregateInterface $aggregate
      */
     public function save(AggregateInterface $aggregate): void
     {
@@ -79,11 +67,7 @@ class SnapshotStore
         $snapshot->setAggregateModified($aggregate->getModified());
         $snapshot->setAggregateClass(get_class($aggregate));
         $snapshot->setHistory($aggregate->getHistory());
-
-        $aggregateData = json_decode(json_encode($aggregate), true);
-        $snapshot->setPayload($aggregateData);
-
-        $snapshot->setAggregateData($aggregate);
+        $snapshot->setAggregate($aggregate);
 
         try {
             $this->em->persist($snapshot);

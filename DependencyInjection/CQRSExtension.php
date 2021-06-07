@@ -7,22 +7,18 @@ use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Exception;
 
 class CQRSExtension extends Extension implements PrependExtensionInterface
 {
-
-    /**
-     * @param array                                                   $configs
-     * @param \Symfony\Component\DependencyInjection\ContainerBuilder $container
-     */
     public function load(array $configs, ContainerBuilder $container): void
     {
     }
 
     /**
-     * @param \Symfony\Component\DependencyInjection\ContainerBuilder $container
+     * @param ContainerBuilder $container
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function prepend(ContainerBuilder $container): void
     {

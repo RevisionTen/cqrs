@@ -27,9 +27,6 @@ final class <?= $commandName; ?>Handler implements HandlerInterface
         return $aggregate;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function createEvent(CommandInterface $command): EventInterface
     {
         return new <?= $commandName; ?>Event(
@@ -41,9 +38,6 @@ final class <?= $commandName; ?>Handler implements HandlerInterface
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function validateCommand(CommandInterface $command, AggregateInterface $aggregate): bool
     {
         $payload = $command->getPayload();
