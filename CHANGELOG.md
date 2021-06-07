@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Upgrade to PHP 7.4+
 - Snapshots use serialized PHP object instead of json arrays. **Delete Snapshots** before upgrading.
 
+## [2.0.8] - 2021-05-27
+### Changed
+- Save snapshots as serialized PHP objects instead of json arrays
+
 ## [2.0.7] - 2020-05-14
 ### Changed
 - Fixed doctrine mapping
