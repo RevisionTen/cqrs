@@ -169,7 +169,7 @@ class EventStreamObject
 
     public function getPayload(): array
     {
-        return is_string($this->payload) ? json_decode($this->payload, true) : $this->payload;
+        return json_decode($this->payload, true);
     }
 
     public function setPayload(array $payload): self

@@ -11,7 +11,6 @@ use RevisionTen\CQRS\Message\Message;
 use RevisionTen\CQRS\Model\EventQueueObject;
 use RevisionTen\CQRS\Model\EventStreamObject;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\EventDispatcher\LegacyEventDispatcherProxy;
 use function array_map;
 use function get_class;
 
@@ -27,7 +26,7 @@ class EventBus
     {
         $this->eventStore = $eventStore;
         $this->messageBus = $messageBus;
-        $this->eventDispatcher = LegacyEventDispatcherProxy::decorate($eventDispatcher);
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
@@ -56,7 +55,7 @@ class EventBus
             $eventStreamObject->setVersion($event->getVersion());
             $eventStreamObject->setUser($event->getUser());
 
-            // Add to list of eventStreamObjects so we can later notify aggregateSubscribers.
+            // Add to list of eventStreamObjects, so we can later notify aggregateSubscribers.
             $eventStreamObjects[] = $eventStreamObject;
 
             // Add the events to the eventStore.

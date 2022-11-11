@@ -8,6 +8,5 @@ use RevisionTen\CQRS\Model\Aggregate;
 
 final class Page extends Aggregate
 {
-    /** @var string */
-    public $title;
+    public ?string $title = null;
 }

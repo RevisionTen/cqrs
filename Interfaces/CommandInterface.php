@@ -6,7 +6,7 @@ namespace RevisionTen\CQRS\Interfaces;
 
 interface CommandInterface
 {
-    public function __construct(int $user, ?string $commandUuid = null, string $aggregateUuid, int $onVersion, array $payload);
+    public function __construct(int $user, ?string $commandUuid, string $aggregateUuid, int $onVersion, array $payload);
 
     /**
      * Returns the Aggregate class associated with this Command.

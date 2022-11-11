@@ -22,7 +22,7 @@ abstract class Command
 
     private int $user;
 
-    public function __construct(int $user, string $commandUuid = null, string $aggregateUuid, int $onVersion, array $payload)
+    public function __construct(int $user, ?string $commandUuid, string $aggregateUuid, int $onVersion, array $payload)
     {
         if (null === $commandUuid) {
             $commandUuid = Uuid::uuid1()->toString();
