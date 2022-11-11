@@ -16,7 +16,7 @@ class CommandTest extends WebTestCase
     /**
      * @var Router
      */
-    private $router;
+    private Router $router;
 
     public function setUp()
     {

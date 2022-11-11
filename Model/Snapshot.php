@@ -119,7 +119,7 @@ class Snapshot
 
     public function getAggregate(): AggregateInterface
     {
-        return is_string($this->aggregateData) ? unserialize($this->aggregateData, ['allowed_classes' => true]) : $this->aggregateData;
+        return unserialize($this->aggregateData, ['allowed_classes' => true]);
     }
 
     public function setAggregate(AggregateInterface $aggregate): self
@@ -167,7 +167,7 @@ class Snapshot
 
     public function getHistory(): array
     {
-        return is_string($this->history) ? json_decode($this->history, true) : $this->history;
+        return json_decode($this->history, true);
     }
 
     public function setHistory(array $history): self

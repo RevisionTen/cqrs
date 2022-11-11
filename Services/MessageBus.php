@@ -15,7 +15,7 @@ class MessageBus
     /**
      * @var Message[]
      */
-    private $messages = [];
+    private array $messages = [];
 
     /**
      * @var object|string
