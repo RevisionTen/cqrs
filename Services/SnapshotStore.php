@@ -42,6 +42,7 @@ class SnapshotStore
         }
 
         $criteria->orderBy(['version' => Criteria::DESC]);
+        $criteria->setMaxResults(1);
 
         /**
          * @var \Doctrine\ORM\EntityRepository $snapshotRepository
