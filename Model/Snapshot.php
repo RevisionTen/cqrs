@@ -20,6 +20,11 @@ use function json_encode;
  * @ORM\Table(name="snapshots", uniqueConstraints={
  *      @ORM\UniqueConstraint(name="unique_version",
  *          columns={"version", "uuid"})
+ * }, indexes={
+ *     @ORM\Index(name="id_idx", columns={"id"}),
+ *     @ORM\Index(name="uuid_idx", columns={"uuid"}),
+ *     @ORM\Index(name="version_idx", columns={"version"}),
+ *     @ORM\Index(name="uuid_version_idx", columns={"uuid", "version"})
  * })
  */
 class Snapshot
