@@ -20,7 +20,7 @@ class CommandMaker extends AbstractMaker
         return 'make:cqrscommand';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConf)
+    public function configureCommand(Command $command, InputConfiguration $inputConfig)
     {
         $command
             ->setDescription('Creates a new cqrs command')

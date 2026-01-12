@@ -70,7 +70,7 @@ class EventStore
      *
      * @return EventStreamObject[]
      */
-    public function find(string $uuid, int $max_version = null, int $min_version = null): array
+    public function find(string $uuid, ?int $max_version = null, ?int $min_version = null): array
     {
         return $this->findEventObjects(EventStreamObject::class, $uuid, $max_version, $min_version);
     }
@@ -85,7 +85,7 @@ class EventStore
      *
      * @return EventStreamObject[]
      */
-    public function findQueued(string $uuid, int $user, int $max_version = null, int $min_version = null): array
+    public function findQueued(string $uuid, int $user, ?int $max_version = null, ?int $min_version = null): array
     {
         /**
          * @var EventQueueObject[] $eventQueueObjects
@@ -108,7 +108,7 @@ class EventStore
      *
      * @return array
      */
-    public function findEventObjects(string $objectClass, string $uuid, int $max_version = null, int $min_version = null, int $user = null): array
+    public function findEventObjects(string $objectClass, string $uuid, ?int $max_version = null, ?int $min_version = null, ?int $user = null): array
     {
         $criteria = new Criteria();
 

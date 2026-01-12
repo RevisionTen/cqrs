@@ -9,7 +9,7 @@ use Throwable;
 
 class AggregateException extends Exception implements ExceptionInterface
 {
-    public function __construct($message = '', $code = CODE_ERROR, Throwable $previous = null)
+    public function __construct($message = '', $code = CODE_ERROR, ?Throwable $previous = null)
     {
         parent::__construct($message, $code, $previous);
     }
